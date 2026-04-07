@@ -82,6 +82,10 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     void set_motb_in2_pin(InternalGPIOPin *pin) {motb_in2_pin_ = pin;}
     // getters
     uint8_t getBoardId() const;
+
+    // i2c devices
+    i2c::I2CDevice motA_ina219;
+    i2c::I2CDevice motB_ina219;
   
   protected:
     // Internal fields definition
@@ -110,7 +114,7 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     WindowMotor motA;
     WindowMotor motB;
 
-    bool calcINA219config(uint16_t *config);
+    bool calcINA219config(uint16_t *config, esphome::i2c::I2CDevice dev);
 };
 
 }  // namespace esphome::window_controller

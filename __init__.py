@@ -42,11 +42,17 @@ WindowController = ns.class_("WindowController", cg.PollingComponent, i2c.I2CDev
 # Use ch422g as example to acces i2c device?
 # Use bedjet as example of parent hub and children
 
+# Define configuration keys for two different addresses
+CONF_MOTA_INA219_ADDRESS = "mota_ina219_address"
+CONF_MOTB_INA219_ADDRESS = "motb_ina219_address"
+
 CONFIG_SCHEMA = (
     cv.COMPONENT_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(WindowController),
             # Schema definition, containing the options available for the component
+            cv.Required(CONF_MOTA_INA219_ADDRESS): cv.i2c_address,
+            cv.Required(CONF_MOTB_INA219_ADDRESS): cv.i2c_address,
             cv.Required(CONF_BOARDID0_PIN): pins.gpio_input_pin_schema,
             cv.Required(CONF_BOARDID1_PIN): pins.gpio_input_pin_schema,
             cv.Required(CONF_BOARDID2_PIN): pins.gpio_input_pin_schema,
@@ -68,14 +74,21 @@ CONFIG_SCHEMA = (
     )
     .extend(cv.polling_component_schema("5s"))
     #.extend(cv.COMPONENT_SCHEMA).extend(i2c.i2c_device_schema(0x40)) # Default I2C address
-    .extend(i2c.i2c_device_schema(0x40))
+    .extend(i2c.i2c_device_schema(None))
 )
 
 async def to_code(config):
     # Declare new component
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await i2c.register_i2c_device(var, config)
+    # Set the addresses for the two internal I2CDevice objects
+    cg.add(var.motA_ina219.set_i2c_address(config[CONF_MOTA_INA219_ADDRESS]))
+    cg.add(var.motB_ina219.set_i2c_address(config[CONF_MOTB_INA219_ADDRESS]))
+    
+    # Important: set the parent bus for both
+    parent = await cg.get_variable(config[i2c.CONF_I2C_ID])
+    cg.add(var.motA_ina219.set_i2c_bus(parent))
+    cg.add(var.motB_ina219.set_i2c_bus(parent))
     
     pin = await cg.gpio_pin_expression(config[CONF_BOARDID0_PIN])
     cg.add(var.set_boardid0_pin(pin))

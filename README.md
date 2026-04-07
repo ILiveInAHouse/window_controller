@@ -5,8 +5,8 @@ Motorized windows: controller running 1 or 2 windowMotors
 # example configuration:
 
 i2c:
-  sda: GPIO08
-  scl: GPIO09
+  sda: GPIO8
+  scl: GPIO9
 
 external_components:
   - source:
@@ -17,6 +17,9 @@ windowController:
   boardid0_pin: GPIO18
   boardid1_pin: GPIO43
   boardid2_pin: GPIO33
+  mota_ina219_address: 0x40
+  motb_ina219_address: 0x41
+  address: 0x20 # required to make schema happy, but not used
   mota_enca_pin: GPIO14
   mota_encb_pin: GPIO4
   mota_pwm_pin: GPIO5
