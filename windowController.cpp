@@ -37,8 +37,8 @@ WindowMotor::WindowMotor() {
     this->faults = 0;
 }
 
-#define ASSIGN_OK 1
-#define ASSIGN_FAIL 0
+#define FUNC_OK 1
+#define FUNC_FAIL 0
 bool WindowMotor::assignMotorPins(InternalGPIOPin *enca_pin, 
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
@@ -47,32 +47,26 @@ bool WindowMotor::assignMotorPins(InternalGPIOPin *enca_pin,
         (pwm_pin == nullptr) || 
         (in1_pin == nullptr) || 
         (in2_pin == nullptr)) {
-        return ASSIGN_FAIL;
+        return FUNC_FAIL;
     }
     this->encA_pin_ = enca_pin;
     this->encB_pin_ = encb_pin;
     this->pwm_pin_ = pwm_pin;
     this->in1_pin_ = in1_pin;
     this->in2_pin_ = in2_pin;
-    return ASSIGN_OK;
+    return FUNC_OK;
 }
 
-WindowController::WindowController() {
-    // Constructor
-    // Initialize class fields and configurations
-}
-
-#define CALC_OK 1
-#define CALC_FAIL 0
-bool WindowController::calcINA219config(uint16_t *config, esphome::i2c::I2CDevice dev) {
+bool WindowMotor::calcINA219config() {
+    uint16_t config = 0x0000;
     // INA219 config
     // Bus ADC and Shunt ADC 12 bit+128 samples
-    *config = 0x0000;
+    config = 0x0000;
     // Continuous operation of Bus and Shunt ADCs
-    *config |= 0b0000000000000111;
+    config |= 0b0000000000000111;
     // Bus ADC and Shunt ADC 12 bit+128 samples -> 68.10 ms
-    *config |= 0b0000011110000000;
-    *config |= 0b0000000001111000;
+    config |= 0b0000011110000000;
+    config |= 0b0000000001111000;
     // default=0.1, min=0.0, max=32.0
     this->shunt_resistance_ohm_ = 0.1;
     // default=3.2, min=0.0
@@ -85,10 +79,10 @@ bool WindowController::calcINA219config(uint16_t *config, esphome::i2c::I2CDevic
     bool bus_32v_range = this->max_voltage_v_ > 16.0f || shunt_max_voltage > 0.16f;
     float multiplier;
     if (bus_32v_range) {
-        *config |= 0b0010000000000000;
+        config |= 0b0010000000000000;
         multiplier = 0.5f;
     } else {
-        *config |= 0b0000000000000000;
+        config |= 0b0000000000000000;
         multiplier = 1.0f;
     }
 
@@ -110,10 +104,10 @@ bool WindowController::calcINA219config(uint16_t *config, esphome::i2c::I2CDevic
         shunt_gain = 0b11;  // 320mV
     }
 
-    *config |= shunt_gain << 11;
+    config |= shunt_gain << 11;
     ESP_LOGCONFIG(TAG, "    Using %dV-Range Shunt Gain=%dmV", bus_32v_range ? 32 : 16, 40 << shunt_gain);
-    if (!dev.write_byte_16(INA219_REGISTER_CONFIG, *config)) {
-        return CALC_FAIL;
+    if (!this->ina219.write_byte_16(INA219_REGISTER_CONFIG, config)) {
+        return FUNC_FAIL;
     }
 
     auto min_lsb = uint32_t(ceilf(this->max_current_a_ * 1000000.0f / 0x8000));
@@ -127,16 +121,53 @@ bool WindowController::calcINA219config(uint16_t *config, esphome::i2c::I2CDevic
     if (lsb > max_lsb) {
         lsb = max_lsb;
         ESP_LOGW(TAG, "    The requested current (%0.02fA) cannot be achieved without an overflow", this->max_current_a_);
-        return CALC_FAIL;
+        return FUNC_FAIL;
     }
 
     this->calibration_lsb_ = lsb;
     auto calibration = uint32_t(0.04096f / (0.000001 * lsb * this->shunt_resistance_ohm_));
     ESP_LOGV(TAG, "    Using LSB=%" PRIu32 " calibration=%" PRIu32, lsb, calibration);
-    if (!dev.write_byte_16(INA219_REGISTER_CALIBRATION, calibration)) {
-        return CALC_FAIL;
+    if (!this->ina219.write_byte_16(INA219_REGISTER_CALIBRATION, calibration)) {
+        return FUNC_FAIL;
     }
-    return CALC_OK;
+    return FUNC_OK;
+}
+
+bool WindowMotor::getBusVoltage(float *bus_voltage_v) {
+    uint16_t raw_bus_voltage;
+    if (!this->ina219.read_byte_16(INA219_REGISTER_BUS_VOLTAGE, &raw_bus_voltage)) {
+      //this->ina219.status_set_warning();
+      return FUNC_FAIL;
+    }
+    raw_bus_voltage >>= 3;
+    *bus_voltage_v = int16_t(raw_bus_voltage) * 0.004f;
+    return FUNC_OK;
+}
+
+bool WindowMotor::getCurrent(float *current_a) {
+    uint16_t raw_current;
+    if (!this->ina219.read_byte_16(INA219_REGISTER_CURRENT, &raw_current)) {
+      //this->ina219.status_set_warning();
+      return FUNC_FAIL;
+    }
+    *current_a = int16_t(raw_current) * (this->calibration_lsb_ / 1000.0f) / 1000.0f;
+    return FUNC_OK;
+}
+
+bool WindowMotor::getShuntVoltage(float *shunt_voltage_mv) {
+    uint16_t raw_shunt_voltage;
+    if (!this->ina219.read_byte_16(INA219_REGISTER_SHUNT_VOLTAGE, &raw_shunt_voltage)) {
+      //this->ina219.status_set_warning();
+      return FUNC_FAIL;
+    }
+    *shunt_voltage_mv = int16_t(raw_shunt_voltage) * 0.01f;
+    return FUNC_OK;
+}
+
+
+WindowController::WindowController() {
+    // Constructor
+    // Initialize class fields and configurations
 }
 
 void WindowController::setup() {
@@ -159,19 +190,18 @@ void WindowController::setup() {
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
 
-    uint16_t config = 0x0000;
-    if (CALC_FAIL == this->calcINA219config(&config, this->motA_ina219)) {
+    if (FUNC_FAIL == this->motA.calcINA219config()) {
         this->mark_failed();
         return;
     }
-    if (CALC_FAIL == this->calcINA219config(&config, this->motB_ina219)) {
+    if (FUNC_FAIL == this->motB.calcINA219config()) {
         this->mark_failed();
         return;
     }
     delay(1);
 
     // setup MotorA
-    if (ASSIGN_FAIL == motA.assignMotorPins(this->mota_enca_pin_, 
+    if (FUNC_FAIL == this->motA.assignMotorPins(this->mota_enca_pin_, 
             this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
             this->mota_in2_pin_)) {
         this->mark_failed();
@@ -180,7 +210,7 @@ void WindowController::setup() {
     }
 
     // setup MotorB
-    if (ASSIGN_FAIL == motB.assignMotorPins(this->motb_enca_pin_, 
+    if (FUNC_FAIL == this->motB.assignMotorPins(this->motb_enca_pin_, 
             this->motb_encb_pin_, this->motb_pwm_pin_, this->motb_in1_pin_,
             this->motb_in2_pin_)) {
         this->mark_failed();
@@ -203,55 +233,26 @@ void WindowController::update() {
                     (this->boardid0_pin_->digital_read() << 0);
     ESP_LOGI(TAG, " boardid: %d", this->boardId);
 
-    uint16_t raw_bus_voltage;
     float bus_voltage_v;
-    if (!this->motA_ina219.read_byte_16(INA219_REGISTER_BUS_VOLTAGE, &raw_bus_voltage)) {
-      this->status_set_warning();
-      return;
-    }
-    raw_bus_voltage >>= 3;
-    bus_voltage_v = int16_t(raw_bus_voltage) * 0.004f;
+    this->motA.getBusVoltage(&bus_voltage_v);
     ESP_LOGI(TAG, " A bus_voltage: %f V", bus_voltage_v);
 
-    if (!this->motB_ina219.read_byte_16(INA219_REGISTER_BUS_VOLTAGE, &raw_bus_voltage)) {
-      this->status_set_warning();
-      return;
-    }
-    raw_bus_voltage >>= 3;
-    bus_voltage_v = int16_t(raw_bus_voltage) * 0.004f;
+    this->motB.getBusVoltage(&bus_voltage_v);
     ESP_LOGI(TAG, " B bus_voltage: %f V", bus_voltage_v);
 
-    uint16_t raw_shunt_voltage;
     float shunt_voltage_mv;
-    if (!this->motA_ina219.read_byte_16(INA219_REGISTER_SHUNT_VOLTAGE, &raw_shunt_voltage)) {
-      this->status_set_warning();
-      return;
-    }
-    shunt_voltage_mv = int16_t(raw_shunt_voltage) * 0.01f;
+    this->motA.getBusVoltage(&shunt_voltage_mv);
     ESP_LOGI(TAG, " A shunt_voltage: %f mV", shunt_voltage_mv);
 
-    if (!this->motB_ina219.read_byte_16(INA219_REGISTER_SHUNT_VOLTAGE, &raw_shunt_voltage)) {
-      this->status_set_warning();
-      return;
-    }
-    shunt_voltage_mv = int16_t(raw_shunt_voltage) * 0.01f;
+    this->motB.getBusVoltage(&shunt_voltage_mv);
     ESP_LOGI(TAG, " B shunt_voltage: %f mV", shunt_voltage_mv);
 
-    uint16_t raw_current;
-    float current_ma;
-    if (!this->motA_ina219.read_byte_16(INA219_REGISTER_CURRENT, &raw_current)) {
-      this->status_set_warning();
-      return;
-    }
-    current_ma = int16_t(raw_current) * (this->calibration_lsb_ / 1000.0f);
-    ESP_LOGI(TAG, " A current: %2.2f A", current_ma/1000.0f);
+    float current_a;
+    this->motA.getCurrent(&current_a);
+    ESP_LOGI(TAG, " A current: %2.2f A", current_a);
 
-    if (!this->motB_ina219.read_byte_16(INA219_REGISTER_CURRENT, &raw_current)) {
-      this->status_set_warning();
-      return;
-    }
-    current_ma = int16_t(raw_current) * (this->calibration_lsb_ / 1000.0f);
-    ESP_LOGI(TAG, " B current: %2.2f A", current_ma/1000.0f);
+    this->motB.getCurrent(&current_a);
+    ESP_LOGI(TAG, " B current: %2.2f A", current_a);
 }
 
 uint8_t WindowController::getBoardId() const { return this->boardId; }

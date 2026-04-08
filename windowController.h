@@ -25,6 +25,7 @@ class WindowMotor {
     bool assignMotorPins(InternalGPIOPin *enca_pin, 
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
+    bool calcINA219config();
 
     // Add any setters of configuration variables
     // void set_encA_pin(InternalGPIOPin *pin) {encA_pin_ = pin;}
@@ -36,6 +37,13 @@ class WindowMotor {
     // void set_sda_pin(InternalGPIOPin *pin) {sda_pin_ = pin;}
  
     // getters
+    bool getBusVoltage(float *bus_voltage_v);
+    bool getCurrent(float *current_a);
+    bool getShuntVoltage(float *shunt_voltage_mv);
+
+    // i2c INA219 current sensor
+    i2c::I2CDevice ina219;
+
   protected:
     // Internal fields definition
     InternalGPIOPin *encA_pin_{nullptr};
@@ -51,6 +59,11 @@ class WindowMotor {
     float maxTorqueSeen;
     float current;
     float rpm;
+    // ina219 vars
+    float shunt_resistance_ohm_;
+    float max_current_a_;
+    float max_voltage_v_;
+    uint32_t calibration_lsb_;
 };
 
 class WindowController : public PollingComponent, public i2c::I2CDevice {
@@ -83,9 +96,8 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     // getters
     uint8_t getBoardId() const;
 
-    // i2c devices
-    i2c::I2CDevice motA_ina219;
-    i2c::I2CDevice motB_ina219;
+    WindowMotor motA;
+    WindowMotor motB;
   
   protected:
     // Internal fields definition
@@ -107,14 +119,8 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
 
     uint8_t boardId{0};
     uint32_t faults{0};
-    float shunt_resistance_ohm_;
-    float max_current_a_;
-    float max_voltage_v_;
-    uint32_t calibration_lsb_;
-    WindowMotor motA;
-    WindowMotor motB;
 
-    bool calcINA219config(uint16_t *config, esphome::i2c::I2CDevice dev);
+    
 };
 
 }  // namespace esphome::window_controller

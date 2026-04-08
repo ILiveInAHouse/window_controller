@@ -82,13 +82,13 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     # Set the addresses for the two internal I2CDevice objects
-    cg.add(var.motA_ina219.set_i2c_address(config[CONF_MOTA_INA219_ADDRESS]))
-    cg.add(var.motB_ina219.set_i2c_address(config[CONF_MOTB_INA219_ADDRESS]))
+    cg.add(var.motA.ina219.set_i2c_address(config[CONF_MOTA_INA219_ADDRESS]))
+    cg.add(var.motB.ina219.set_i2c_address(config[CONF_MOTB_INA219_ADDRESS]))
     
     # Important: set the parent bus for both
     parent = await cg.get_variable(config[i2c.CONF_I2C_ID])
-    cg.add(var.motA_ina219.set_i2c_bus(parent))
-    cg.add(var.motB_ina219.set_i2c_bus(parent))
+    cg.add(var.motA.ina219.set_i2c_bus(parent))
+    cg.add(var.motB.ina219.set_i2c_bus(parent))
     
     pin = await cg.gpio_pin_expression(config[CONF_BOARDID0_PIN])
     cg.add(var.set_boardid0_pin(pin))
