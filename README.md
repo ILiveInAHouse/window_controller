@@ -7,6 +7,7 @@ Motorized windows: controller running 1 or 2 windowMotors
 i2c:
   sda: GPIO8
   scl: GPIO9
+  frequency: 400kHz
 
 external_components:
   - source:

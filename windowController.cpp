@@ -164,10 +164,42 @@ bool WindowMotor::getShuntVoltage(float *shunt_voltage_mv) {
     return FUNC_OK;
 }
 
+bool WindowMotor::powerdownINA219() {
+  // Mode = 0 -> power down
+  if (!this->ina219.write_byte_16(INA219_REGISTER_CONFIG, 0)) {
+    ESP_LOGE(TAG, "powerdown error");
+  }
+  return FUNC_OK;
+}
+
+bool WindowMotor::setup(uint8_t boardId, InternalGPIOPin *enca_pin, 
+                        InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
+                        InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
+    if (FUNC_FAIL == this->calcINA219config()) {
+        return FUNC_FAIL;
+    }
+    if (FUNC_FAIL == this->assignMotorPins(enca_pin, encb_pin, pwm_pin, 
+            in1_pin, in2_pin)) {
+        this->faults |= WINMOTFAULT_PIN_NULL;
+        return FUNC_FAIL;
+    }
+    return FUNC_OK;
+}
+
+void WindowMotor::update() {
+    float bus_voltage_v;
+    this->getBusVoltage(&bus_voltage_v);
+    ESP_LOGI(TAG, " A bus_voltage: %f V", bus_voltage_v);
+
+    float current_a;
+    this->getCurrent(&current_a);
+    ESP_LOGI(TAG, " A current: %2.2f A", current_a);
+}
 
 WindowController::WindowController() {
     // Constructor
     // Initialize class fields and configurations
+    this->shutdownImminent = false;
 }
 
 void WindowController::setup() {
@@ -190,33 +222,21 @@ void WindowController::setup() {
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
 
-    if (FUNC_FAIL == this->motA.calcINA219config()) {
+    // setup MotorA
+    if (FUNC_FAIL == this->motA.setup(this->boardId, this->mota_enca_pin_, 
+            this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
+            this->mota_in2_pin_)) {
         this->mark_failed();
         return;
     }
-    if (FUNC_FAIL == this->motB.calcINA219config()) {
+    // setup MotorB
+    if (FUNC_FAIL == this->motB.setup(this->boardId, this->mota_enca_pin_, 
+            this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
+            this->mota_in2_pin_)) {
         this->mark_failed();
         return;
     }
     delay(1);
-
-    // setup MotorA
-    if (FUNC_FAIL == this->motA.assignMotorPins(this->mota_enca_pin_, 
-            this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
-            this->mota_in2_pin_)) {
-        this->mark_failed();
-        this->faults |= WINCTRLFAULT_BOARDID_PIN_NULL;
-        return;
-    }
-
-    // setup MotorB
-    if (FUNC_FAIL == this->motB.assignMotorPins(this->motb_enca_pin_, 
-            this->motb_encb_pin_, this->motb_pwm_pin_, this->motb_in1_pin_,
-            this->motb_in2_pin_)) {
-        this->mark_failed();
-        this->faults |= WINCTRLFAULT_BOARDID_PIN_NULL;
-        return;
-    }
 }
 
 //void ExampleComponent::loop() {
@@ -228,31 +248,19 @@ void WindowController::setup() {
 //}
 
 void WindowController::update() {
+    if (this->shutdownImminent) {
+        return;
+    }
     this->boardId = (this->boardid2_pin_->digital_read() << 2) |
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
     ESP_LOGI(TAG, " boardid: %d", this->boardId);
 
-    float bus_voltage_v;
-    this->motA.getBusVoltage(&bus_voltage_v);
-    ESP_LOGI(TAG, " A bus_voltage: %f V", bus_voltage_v);
+    // update Motor A
+    this->motA.update();
 
-    this->motB.getBusVoltage(&bus_voltage_v);
-    ESP_LOGI(TAG, " B bus_voltage: %f V", bus_voltage_v);
-
-    float shunt_voltage_mv;
-    this->motA.getBusVoltage(&shunt_voltage_mv);
-    ESP_LOGI(TAG, " A shunt_voltage: %f mV", shunt_voltage_mv);
-
-    this->motB.getBusVoltage(&shunt_voltage_mv);
-    ESP_LOGI(TAG, " B shunt_voltage: %f mV", shunt_voltage_mv);
-
-    float current_a;
-    this->motA.getCurrent(&current_a);
-    ESP_LOGI(TAG, " A current: %2.2f A", current_a);
-
-    this->motB.getCurrent(&current_a);
-    ESP_LOGI(TAG, " B current: %2.2f A", current_a);
+    // update Motor B
+    this->motB.update();
 }
 
 uint8_t WindowController::getBoardId() const { return this->boardId; }
@@ -290,24 +298,24 @@ void WindowController::dump_config() {
 //   return setup_priority::DATA;
 // }
 
-// void ExampleComponent::on_safe_shutdown() {
-//   // Optional: Critical cleanup operations for safe shutdowns only
-//   // This is called first, before any other shutdown procedures
-//   ESP_LOGI(TAG, "Safe shutdown initiated");
-// }
-
-// void ExampleComponent::on_shutdown() {
-//   // Optional: Start shutdown process
-//   // For example, send a disconnect message but don't close connections yet
-//   ESP_LOGI(TAG, "Starting shutdown");
-// }
-
-void WindowController::on_powerdown() {
-  // Mode = 0 -> power down
-  if (!this->write_byte_16(INA219_REGISTER_CONFIG, 0)) {
-    ESP_LOGE(TAG, "powerdown error");
-  }
+void WindowController::on_safe_shutdown() {
+  // Optional: Critical cleanup operations for safe shutdowns only
+  // This is called first, before any other shutdown procedures
+  // ESP_LOGI(TAG, "Safe shutdown initiated");
+  this->motA.powerdownINA219();
+  this->motB.powerdownINA219();
+  this->shutdownImminent = true;
 }
+
+void WindowController::on_shutdown() {
+  // Optional: Start shutdown process
+  // For example, send a disconnect message but don't close connections yet
+  // ESP_LOGI(TAG, "Starting shutdown");
+  this->shutdownImminent = true;
+}
+
+// void WindowController::on_powerdown() {
+// }
 
 // bool ExampleComponent::teardown() {
 //   // Optional: Finish any pending operations

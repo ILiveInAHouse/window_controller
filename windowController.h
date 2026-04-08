@@ -5,7 +5,10 @@
 //#include "windowMotor.h"
 #include "esphome/components/i2c/i2c.h"
 
-// window motor controller faults
+// window motor faults
+#define WINMOTFAULT_PIN_NULL 0x0
+
+// window controller faults
 #define WINCTRLFAULT_BOARDID_PIN_NULL 0x0
 
 // Namespace definition
@@ -17,6 +20,12 @@ class WindowMotor {
     // Constructor
     WindowMotor();
     
+    bool setup(uint8_t boardId, InternalGPIOPin *enca_pin, 
+              InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
+              InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
+
+    void update();
+
     // Standard component functions to override
     // void setup() override;
     // void dump_config() override;
@@ -26,6 +35,7 @@ class WindowMotor {
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
     bool calcINA219config();
+    bool powerdownINA219();
 
     // Add any setters of configuration variables
     // void set_encA_pin(InternalGPIOPin *pin) {encA_pin_ = pin;}
@@ -75,7 +85,8 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     void setup() override;
     void dump_config() override;
     void update() override;
-    void on_powerdown() override;
+    void on_safe_shutdown() override;
+    void on_shutdown() override;
 
     // Add any setters of configuration variables
     void set_boardid0_pin(InternalGPIOPin *pin) {boardid0_pin_ = pin;}
@@ -119,7 +130,7 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
 
     uint8_t boardId{0};
     uint32_t faults{0};
-
+    bool shutdownImminent{false};
     
 };
 
