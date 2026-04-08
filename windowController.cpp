@@ -35,6 +35,9 @@ static const uint8_t INA219_REGISTER_CALIBRATION = 0x05;
 
 WindowMotor::WindowMotor() {
     this->faults = 0;
+    this->boardId = 0xff;
+    this->windowNumber = 0;
+    this->statusMask = 0x0;
 }
 
 #define FUNC_OK 1
@@ -172,7 +175,32 @@ bool WindowMotor::powerdownINA219() {
   return FUNC_OK;
 }
 
-bool WindowMotor::setup(uint8_t boardId, InternalGPIOPin *enca_pin, 
+void WindowMotor::calcWinNumAndStsMsk() {
+    if (this->boardId > MAX_BOARD_ID) {
+        return;
+    }
+    // Calculate Window number and status mask
+    //                           statusMask 0x0001 reserved for all-stop
+    // boardId 0 = windows 1&2   statusMask 0x0002 & 0x0004
+    // boardId 1 = windows 5&6   statusMask 0x0008 & 0x0010
+    // boardId 2 = windows 9&10  statusMask 0x0020 & 0x0040
+    // boardId 3 = windows 11&12 statusMask 0x0080 & 0x0100
+    // boardId 4 = windows 13&14 statusMask 0x0200 & 0x0400
+    this->windowNumber = 1;
+    if (!this->isMotorA) {
+        this->windowNumber++;
+    }
+    if (this->boardId > 0) {
+        this->windowNumber += 4;
+    }
+    if (this->boardId > 1) {
+        this->windowNumber += 4;
+        this->windowNumber += (2*(this->boardId-2));
+    }
+    this->statusMask = 2 << (((this->boardId * 2) + ((this->isMotorA) ? 0 : 1)));
+}
+
+bool WindowMotor::setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
     if (FUNC_FAIL == this->calcINA219config()) {
@@ -183,17 +211,21 @@ bool WindowMotor::setup(uint8_t boardId, InternalGPIOPin *enca_pin,
         this->faults |= WINMOTFAULT_PIN_NULL;
         return FUNC_FAIL;
     }
+    this->isMotorA = isMotorA;
+    this->boardId = boardId;
+    this->calcWinNumAndStsMsk();
     return FUNC_OK;
 }
 
 void WindowMotor::update() {
+    this->calcWinNumAndStsMsk();
     float bus_voltage_v;
     this->getBusVoltage(&bus_voltage_v);
-    ESP_LOGI(TAG, " A bus_voltage: %f V", bus_voltage_v);
-
     float current_a;
     this->getCurrent(&current_a);
-    ESP_LOGI(TAG, " A current: %2.2f A", current_a);
+    ESP_LOGI(TAG, " %c win#=%d stsMsk=%04x bus_voltage=%2.2fV current:%2.2fA", 
+            (this->isMotorA) ? 'A' : 'B', this->windowNumber, this->statusMask, 
+            bus_voltage_v, current_a);
 }
 
 WindowController::WindowController() {
@@ -221,16 +253,20 @@ void WindowController::setup() {
     this->boardId = (this->boardid2_pin_->digital_read() << 2) |
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
+    if (boardId > MAX_BOARD_ID) {
+        this->mark_failed();
+        return;
+    }
 
     // setup MotorA
-    if (FUNC_FAIL == this->motA.setup(this->boardId, this->mota_enca_pin_, 
+    if (FUNC_FAIL == this->motA.setup(this->boardId, true, this->mota_enca_pin_, 
             this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
             this->mota_in2_pin_)) {
         this->mark_failed();
         return;
     }
     // setup MotorB
-    if (FUNC_FAIL == this->motB.setup(this->boardId, this->mota_enca_pin_, 
+    if (FUNC_FAIL == this->motB.setup(this->boardId, false, this->mota_enca_pin_, 
             this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
             this->mota_in2_pin_)) {
         this->mark_failed();
@@ -257,9 +293,11 @@ void WindowController::update() {
     ESP_LOGI(TAG, " boardid: %d", this->boardId);
 
     // update Motor A
+    this->motA.boardId = this->boardId;
     this->motA.update();
 
     // update Motor B
+    this->motB.boardId = this->boardId;
     this->motB.update();
 }
 

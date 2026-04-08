@@ -11,6 +11,8 @@
 // window controller faults
 #define WINCTRLFAULT_BOARDID_PIN_NULL 0x0
 
+#define MAX_BOARD_ID 4
+
 // Namespace definition
 namespace esphome::window_controller {
 
@@ -20,7 +22,7 @@ class WindowMotor {
     // Constructor
     WindowMotor();
     
-    bool setup(uint8_t boardId, InternalGPIOPin *enca_pin, 
+    bool setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
               InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
               InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
 
@@ -36,6 +38,7 @@ class WindowMotor {
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
     bool calcINA219config();
     bool powerdownINA219();
+    void calcWinNumAndStsMsk();
 
     // Add any setters of configuration variables
     // void set_encA_pin(InternalGPIOPin *pin) {encA_pin_ = pin;}
@@ -53,6 +56,7 @@ class WindowMotor {
 
     // i2c INA219 current sensor
     i2c::I2CDevice ina219;
+    uint8_t boardId;
 
   protected:
     // Internal fields definition
@@ -63,6 +67,9 @@ class WindowMotor {
     InternalGPIOPin *in2_pin_{nullptr};
 
     uint32_t faults;
+    uint8_t windowNumber;
+    uint16_t statusMask;
+    bool isMotorA;
     uint8_t targetPositionPercent;
     float numRotationsToFullOpen;
     float currentRotationIndex;
