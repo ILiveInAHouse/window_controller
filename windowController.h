@@ -48,6 +48,7 @@ class WindowMotor {
     // void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
     // void set_scl_pin(InternalGPIOPin *pin) {scl_pin_ = pin;}
     // void set_sda_pin(InternalGPIOPin *pin) {sda_pin_ = pin;}
+    void setAllMotorStatus(uint16_t newsts);
  
     // getters
     bool getBusVoltage(float *bus_voltage_v);
@@ -69,6 +70,7 @@ class WindowMotor {
     uint32_t faults;
     uint8_t windowNumber;
     uint16_t statusMask;
+    uint16_t allMotorStatus;
     bool isMotorA;
     uint8_t targetPositionPercent;
     float numRotationsToFullOpen;
@@ -111,6 +113,7 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     void set_motb_pwm_pin(InternalGPIOPin *pin) {motb_pwm_pin_ = pin;}
     void set_motb_in1_pin(InternalGPIOPin *pin) {motb_in1_pin_ = pin;}
     void set_motb_in2_pin(InternalGPIOPin *pin) {motb_in2_pin_ = pin;}
+    void setAllMotorStatus(uint16_t newsts);
     // getters
     uint8_t getBoardId() const;
 

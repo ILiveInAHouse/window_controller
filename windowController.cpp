@@ -200,6 +200,10 @@ void WindowMotor::calcWinNumAndStsMsk() {
     this->statusMask = 2 << (((this->boardId * 2) + ((this->isMotorA) ? 0 : 1)));
 }
 
+void WindowMotor::setAllMotorStatus(uint16_t newsts) {
+    this->allMotorStatus = newsts;
+}
+
 bool WindowMotor::setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
@@ -299,6 +303,11 @@ void WindowController::update() {
     // update Motor B
     this->motB.boardId = this->boardId;
     this->motB.update();
+}
+
+void WindowController::setAllMotorStatus(uint16_t newsts) {
+    this->motA.setAllMotorStatus(newsts);
+    this->motB.setAllMotorStatus(newsts);
 }
 
 uint8_t WindowController::getBoardId() const { return this->boardId; }
