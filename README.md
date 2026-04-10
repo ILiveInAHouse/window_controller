@@ -3,6 +3,15 @@ Motorized windows: controller running 1 or 2 windowMotors
 
 ```yaml
 # example configuration:
+esphome:
+  name: windowctrl-dev
+  friendly_name: windowCtrl_dev
+
+  devices:
+    - id: motor_A_device
+      name: "MotorA"
+    - id: motor_B_device
+      name: "MotorB"
 
 i2c:
   sda: GPIO8
@@ -31,4 +40,9 @@ windowController:
   motb_pwm_pin: GPIO6
   motb_in1_pin: GPIO37
   motb_in2_pin: GPIO38
+
+sensor:
+  - platform: windowController
+    name: "windowANumber"
+    device_id: motor_A_device
 ```

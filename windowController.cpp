@@ -204,6 +204,10 @@ void WindowMotor::setAllMotorStatus(uint16_t newsts) {
     this->allMotorStatus = newsts;
 }
 
+uint8_t WindowMotor::getWindowNumber() {
+    return this->windowNumber;
+}
+
 bool WindowMotor::setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
@@ -311,6 +315,10 @@ void WindowController::setAllMotorStatus(uint16_t newsts) {
 }
 
 uint8_t WindowController::getBoardId() const { return this->boardId; }
+
+uint8_t WindowController::getWindowNumber() {
+    return this->motA.getWindowNumber();
+}
 
 // Called once after booting and then each time a new client connects
 //   to monitor logs

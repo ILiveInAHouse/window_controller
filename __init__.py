@@ -5,13 +5,15 @@ from esphome.components import i2c
 import esphome.codegen as cg
 from esphome.const import (
     CONF_ID,
+    CONF_NUMBER
 )
 
 CODEOWNERS = ["@ILiveInAHouse"]
-#DEPENDENCIES = ["ina219"]
 DEPENDENCIES = ["i2c"]
 AUTO_LOAD = [ ]
 MULTI_CONF = True
+
+CONF_WINDOWCONTROLLER_ID = "windowcontroller_id"
 
 # Define constants for configuration keys
 CONF_BOARDID0_PIN = "boardid0_pin"
@@ -31,16 +33,16 @@ CONF_MOTBIN1_PIN = "motb_in1_pin"
 CONF_MOTBIN2_PIN = "motb_in2_pin"
 
 # C++ namespace
-ns = cg.esphome_ns.namespace("window_controller")
+winctrl_ns = cg.esphome_ns.namespace("window_controller")
 # Create class and inherit from
 #WindowController = ns.class_("WindowController", cg.PollingComponent, ina219.INA219Component)
 # also look at uart.UARTDevice as an example
-WindowController = ns.class_("WindowController", cg.PollingComponent, i2c.I2CDevice)
+WindowController = winctrl_ns.class_("WindowController", cg.PollingComponent, i2c.I2CDevice)
 
 # Look at Parent Hub and Child components
 # Look at cv.use_id
-# Use ch422g as example to acces i2c device?
 # Use bedjet as example of parent hub and children
+# ads1115 is a simpler example of a parent hub and children
 
 # Define configuration keys for two different addresses
 CONF_MOTA_INA219_ADDRESS = "mota_ina219_address"

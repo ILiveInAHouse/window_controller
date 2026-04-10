@@ -54,6 +54,7 @@ class WindowMotor {
     bool getBusVoltage(float *bus_voltage_v);
     bool getCurrent(float *current_a);
     bool getShuntVoltage(float *shunt_voltage_mv);
+    uint8_t getWindowNumber();
 
     // i2c INA219 current sensor
     i2c::I2CDevice ina219;
@@ -116,7 +117,8 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     void setAllMotorStatus(uint16_t newsts);
     // getters
     uint8_t getBoardId() const;
-
+    uint8_t getWindowNumber();
+    
     WindowMotor motA;
     WindowMotor motB;
   
