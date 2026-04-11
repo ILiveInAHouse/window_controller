@@ -18,14 +18,22 @@ DEPENDENCIES = ["window_controller"]
 
 CONF_WINDOW_NUMBER = "window_number"
 CONF_FAULTS = "faults"
+CONF_WHICH_MOTOR = "which_motor"
 
 WindowControllerSensor = winctrl_ns.class_(
     "WindowControllerSensor", cg.PollingComponent
 )
 
+WhichMotor = winctrl_ns.enum("WhichMotorEnum")
+MOTOR_ENUMS = {
+    "MOTOR_A": WhichMotor.MOTOR_A,
+    "MOTOR_B": WhichMotor.MOTOR_B,
+}
+
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(WindowControllerSensor),
+        cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
         cv.Optional(CONF_WINDOW_NUMBER): sensor.sensor_schema(
             state_class=STATE_CLASS_MEASUREMENT,
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
@@ -50,4 +58,5 @@ async def to_code(config):
     if faults_sensor := config.get(CONF_FAULTS):
         sensor_var = await sensor.new_sensor(faults_sensor)
         cg.add(var.set_faults_sensor(sensor_var))
+    cg.add(var.set_whichMotor(config[CONF_WHICH_MOTOR]))
 

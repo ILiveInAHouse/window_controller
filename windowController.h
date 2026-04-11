@@ -2,7 +2,6 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/gpio.h"
-//#include "windowMotor.h"
 #include "esphome/components/i2c/i2c.h"
 #include "windowControllerChild.h"
 
@@ -16,6 +15,8 @@
 
 // Namespace definition
 namespace esphome::window_controller {
+
+enum WhichMotorEnum { MOTOR_A = 0, MOTOR_B = 1 };
 
 // Forward declare WindowControllerClient
 class WindowControllerClient;

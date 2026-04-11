@@ -41,8 +41,7 @@ WindowController = winctrl_ns.class_("WindowController", cg.PollingComponent, i2
 
 # Look at Parent Hub and Child components
 # Look at cv.use_id
-# Use bedjet as example of parent hub and children
-# ads1115 is a simpler example of a parent hub and children
+# Use bedjet as example of parent hub and children with multiple sensors
 
 # Define configuration keys for two different addresses
 CONF_MOTA_INA219_ADDRESS = "mota_ina219_address"

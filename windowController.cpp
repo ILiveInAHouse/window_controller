@@ -316,6 +316,8 @@ void WindowController::update() {
 }
 
 void WindowController::publish_info_() {
+    // each component type (sensor, fan, etc) is a new child
+    // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
         child->publish_info();
     }

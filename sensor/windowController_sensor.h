@@ -15,6 +15,7 @@ namespace window_controller {
 class WindowControllerSensor : public WindowControllerClient, public PollingComponent {
  public:
   void dump_config() override;
+  void setup() override;
   void update() override;
   void set_window_number_sensor(sensor::Sensor *window_number_sensor) {
     this->window_number_sensor_ = window_number_sensor;
@@ -22,8 +23,13 @@ class WindowControllerSensor : public WindowControllerClient, public PollingComp
   void set_faults_sensor(sensor::Sensor *faults_sensor) {
     this->faults_sensor_ = faults_sensor;
   }
-   uint8_t getWindowNumber();
-   void publish_info();
+  void set_whichMotor(WhichMotorEnum whichMotor_) {
+    this->whichMotor = whichMotor_;
+  }
+  uint8_t getWindowNumber();
+  void publish_info();
+  WhichMotorEnum whichMotor;
+  WindowMotor *motorClassPtr;
 
  protected:
     sensor::Sensor *window_number_sensor_{nullptr};
