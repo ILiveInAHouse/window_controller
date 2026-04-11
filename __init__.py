@@ -79,6 +79,16 @@ CONFIG_SCHEMA = (
     .extend(i2c.i2c_device_schema(None))
 )
 
+WINDOWCONTROLLER_CLIENT_SCHEMA = cv.Schema(
+    {
+        cv.GenerateID(CONF_WINDOWCONTROLLER_ID): cv.use_id(WindowController),
+    }
+)
+
+async def register_windowcontroller_child(var, config):
+    parent = await cg.get_variable(config[CONF_WINDOWCONTROLLER_ID])
+    cg.add(parent.register_child(var))
+
 async def to_code(config):
     # Declare new component
     var = cg.new_Pvariable(config[CONF_ID])

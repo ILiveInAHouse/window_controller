@@ -4,6 +4,7 @@
 #include "esphome/core/gpio.h"
 //#include "windowMotor.h"
 #include "esphome/components/i2c/i2c.h"
+#include "windowControllerChild.h"
 
 // window motor faults
 #define WINMOTFAULT_PIN_NULL 0x0
@@ -15,6 +16,9 @@
 
 // Namespace definition
 namespace esphome::window_controller {
+
+// Forward declare WindowControllerClient
+class WindowControllerClient;
 
 class WindowMotor {
 
@@ -55,6 +59,7 @@ class WindowMotor {
     bool getCurrent(float *current_a);
     bool getShuntVoltage(float *shunt_voltage_mv);
     uint8_t getWindowNumber();
+    uint32_t getFaults();
 
     // i2c INA219 current sensor
     i2c::I2CDevice ina219;
@@ -70,8 +75,9 @@ class WindowMotor {
 
     uint32_t faults;
     uint8_t windowNumber;
+    uint16_t status;          // statusMask bit is set if this window has work to do
     uint16_t statusMask;
-    uint16_t allMotorStatus;
+    uint16_t allMotorStatus;  // input from Hass
     bool isMotorA;
     uint8_t targetPositionPercent;
     float numRotationsToFullOpen;
@@ -118,11 +124,16 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     // getters
     uint8_t getBoardId() const;
     uint8_t getWindowNumber();
-    
+    uint32_t getFaults();
+
     WindowMotor motA;
     WindowMotor motB;
   
+    void register_child(WindowControllerClient *obj);
+
   protected:
+    std::vector<WindowControllerClient *> children_;
+    void publish_info_();
     // Internal fields definition
     InternalGPIOPin *boardid0_pin_{nullptr};
     InternalGPIOPin *boardid1_pin_{nullptr};

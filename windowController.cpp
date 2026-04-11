@@ -208,6 +208,10 @@ uint8_t WindowMotor::getWindowNumber() {
     return this->windowNumber;
 }
 
+uint32_t WindowMotor::getFaults() {
+    return this->faults;
+}
+
 bool WindowMotor::setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
                         InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
                         InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
@@ -307,6 +311,14 @@ void WindowController::update() {
     // update Motor B
     this->motB.boardId = this->boardId;
     this->motB.update();
+
+    this->publish_info_();
+}
+
+void WindowController::publish_info_() {
+    for (auto *child : this->children_) {
+        child->publish_info();
+    }
 }
 
 void WindowController::setAllMotorStatus(uint16_t newsts) {
@@ -318,6 +330,10 @@ uint8_t WindowController::getBoardId() const { return this->boardId; }
 
 uint8_t WindowController::getWindowNumber() {
     return this->motA.getWindowNumber();
+}
+
+uint32_t WindowController::getFaults() {
+    return this->motA.getFaults();
 }
 
 // Called once after booting and then each time a new client connects
@@ -382,5 +398,11 @@ void WindowController::on_shutdown() {
 //   // to prevent slowing down the shutdown process.
 //   return true;
 // }
+
+void WindowController::register_child(WindowControllerClient *obj) {
+  this->children_.push_back(obj);
+  obj->set_parent(this);
+}
+
 
 }  // namespace esphome::window_controller

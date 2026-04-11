@@ -23,7 +23,7 @@ external_components:
       type: local
       path: ../components
 
-windowController:
+window_controller:
   boardid0_pin: GPIO18
   boardid1_pin: GPIO43
   boardid2_pin: GPIO33
@@ -42,7 +42,11 @@ windowController:
   motb_in2_pin: GPIO38
 
 sensor:
-  - platform: windowController
-    name: "windowANumber"
-    device_id: motor_A_device
+  - platform: window_controller
+    window_number:
+      device_id: motor_A_device
+      name: "Window Number"
+    faults:
+      device_id: motor_A_device
+      name: "Faults"
 ```

@@ -11,14 +11,20 @@ uint8_t WindowControllerSensor::getWindowNumber() {
   return this->parent_->getWindowNumber();
 }
 
+void WindowControllerSensor::publish_info() {
+   uint8_t winNum_ = this->getWindowNumber();
+   ESP_LOGD(TAG, "'Got Window Number=%d", winNum_);
+   this->window_number_sensor_->publish_state(winNum_);
+   uint32_t faults_  = this->parent_->getFaults();
+   this->faults_sensor_->publish_state(faults_);
+}
+
 void WindowControllerSensor::update() {
-   uint8_t winNum = this->getWindowNumber();
-   ESP_LOGD(TAG, "'%s': Got Window Number=%d", this->get_name().c_str(), winNum);
-   this->publish_state(winNum);
+
 }
 
 void WindowControllerSensor::dump_config() {
-  LOG_SENSOR("  ", "Window Controller Sensor", this);
+//  LOG_SENSOR("  ", "Window Controller Sensor", this);
 //   ESP_LOGCONFIG(TAG,
 //                 "    Multiplexer: %u\n"
 //                 "    Gain: %u\n"
