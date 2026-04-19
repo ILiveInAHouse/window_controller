@@ -3,7 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 
-#include "esphome/components/sensor/sensor.h"
+#include "esphome/components/number/number.h"
 
 #include "../windowController.h"
 #include "../windowControllerChild.h"
@@ -12,28 +12,26 @@ namespace esphome {
 namespace window_controller {
 
 /// Internal holder class that is in instance of Sensor so that the hub can create individual sensors.
-class WindowControllerSensor : public WindowControllerClient, public PollingComponent {
+class WindowControllerNumber : public WindowControllerClient, public number::Number, public PollingComponent {
  public:
+  WindowControllerNumber();
   void dump_config() override;
   void setup() override;
   void update() override;
+  void control(float val) override;
   bool floatsNotEqual(float a, float b, float delta);
-  void set_window_number_sensor(sensor::Sensor *window_number_sensor) {
-    this->window_number_sensor_ = window_number_sensor;
-  }
-  void set_faults_sensor(sensor::Sensor *faults_sensor) {
-    this->faults_sensor_ = faults_sensor;
-  }
   void set_whichMotor(WhichMotorEnum whichMotor_) {
     this->whichMotor = whichMotor_;
+  }
+  void set_target_position_number(number::Number *target_position_number) {
+    this->target_position_number_ = target_position_number;
   }
   void publish_info();
   WhichMotorEnum whichMotor;
   WindowMotor *motorClassPtr;
 
  protected:
-    sensor::Sensor *window_number_sensor_{nullptr};
-    sensor::Sensor *faults_sensor_{nullptr};
+    number::Number *target_position_number_{nullptr};
 
 };
 

@@ -38,6 +38,7 @@ WindowMotor::WindowMotor() {
     this->boardId = 0xff;
     this->windowNumber = 0;
     this->statusMask = 0x0;
+    this->targetPosition = 0;
 }
 
 #define FUNC_OK 1
@@ -329,10 +330,6 @@ void WindowController::setAllMotorStatus(uint16_t newsts) {
 }
 
 uint8_t WindowController::getBoardId() const { return this->boardId; }
-
-uint8_t WindowController::getWindowNumber() {
-    return this->motA.getWindowNumber();
-}
 
 uint32_t WindowController::getFaults() {
     return this->motA.getFaults();

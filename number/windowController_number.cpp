@@ -1,13 +1,17 @@
-#include "windowController_sensor.h"
+#include "windowController_number.h"
 
 #include "esphome/core/log.h"
 
 namespace esphome {
 namespace window_controller {
 
-static const char *const TAG = "windowcontroller.sensor";
+static const char *const TAG = "windowcontroller.number";
 
-void WindowControllerSensor::setup() {
+WindowControllerNumber::WindowControllerNumber() {
+
+}
+
+void WindowControllerNumber::setup() {
   if (this->whichMotor == MOTOR_A) {
     this->motorClassPtr = &this->parent_->motA;
   } else {
@@ -15,7 +19,11 @@ void WindowControllerSensor::setup() {
   }
 }
 
-bool WindowControllerSensor::floatsNotEqual(float a, float b, float delta) {
+void WindowControllerNumber::control(float val) {
+  this->publish_state(val);
+}
+
+bool WindowControllerNumber::floatsNotEqual(float a, float b, float delta) {
   if (std::isnan(a) || std::isnan(b) || std::isnan(delta)) {
     return true;
   }
@@ -25,27 +33,23 @@ bool WindowControllerSensor::floatsNotEqual(float a, float b, float delta) {
   return false;
 }
 
-void WindowControllerSensor::publish_info() {
+void WindowControllerNumber::publish_info() {
   if (this->motorClassPtr) {
-    uint8_t winNum_ = this->motorClassPtr->getWindowNumber();
+    float targetPos_ = this->motorClassPtr->targetPosition;
     // ESP_LOGD(TAG, "winNum=%d get_state=%f state-winNum=%f", winNum_, this->window_number_sensor_->get_state(), winNum_ - this->window_number_sensor_->get_state());
-    if (this->floatsNotEqual(this->window_number_sensor_->get_state(), winNum_, 0.2f)) {
-      ESP_LOGD(TAG, "motor%c: winNum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', winNum_);
-      this->window_number_sensor_->publish_state(winNum_);
-    }
-    uint32_t faults_  = this->parent_->getFaults();
-    if (floatsNotEqual(this->faults_sensor_->get_state(), faults_, 0.2f)) {
-      this->faults_sensor_->publish_state(faults_);
-    }
+    // if (this->floatsNotEqual(this->target_position_->state, targetPos_, 0.1f)) {
+      ESP_LOGD(TAG, "motor%c: targetPos=%f", (this->whichMotor == MOTOR_A) ? 'A' : 'B', targetPos_);
+      this->target_position_number_->publish_state(targetPos_);
+    // }
   }
 }
 
-void WindowControllerSensor::update() {
+void WindowControllerNumber::update() {
 
 }
 
-void WindowControllerSensor::dump_config() {
-//  LOG_SENSOR("  ", "Window Controller Sensor", this);
+void WindowControllerNumber::dump_config() {
+//  LOG_SENSOR("  ", "Window Controller Number", this);
 //   ESP_LOGCONFIG(TAG,
 //                 "    Multiplexer: %u\n"
 //                 "    Gain: %u\n"

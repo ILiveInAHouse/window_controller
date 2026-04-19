@@ -43,10 +43,27 @@ window_controller:
 
 sensor:
   - platform: window_controller
+    which_motor: MOTOR_A
     window_number:
       device_id: motor_A_device
       name: "Window Number"
     faults:
       device_id: motor_A_device
       name: "Faults"
+  - platform: window_controller
+    which_motor: MOTOR_B
+    window_number:
+      device_id: motor_B_device
+      name: "Window Number"
+    faults:
+      device_id: motor_B_device
+      name: "Faults"
+
+number:
+  - platform: window_controller
+    which_motor: MOTOR_A
+    target_position:
+      device_id: motor_A_device
+      name: "Window A Control" # needed id and name to avoid being "internal" component
+    #unit_of_measurement: "%"
 ```

@@ -62,9 +62,9 @@ class WindowMotor {
     uint8_t getWindowNumber();
     uint32_t getFaults();
 
-    // i2c INA219 current sensor
-    i2c::I2CDevice ina219;
+    i2c::I2CDevice ina219;  // current sensor
     uint8_t boardId;
+    float targetPosition;
 
   protected:
     // Internal fields definition
@@ -80,7 +80,6 @@ class WindowMotor {
     uint16_t statusMask;
     uint16_t allMotorStatus;  // input from Hass
     bool isMotorA;
-    uint8_t targetPositionPercent;
     float numRotationsToFullOpen;
     float currentRotationIndex;
     float maxTorqueSeen;
@@ -124,7 +123,6 @@ class WindowController : public PollingComponent, public i2c::I2CDevice {
     void setAllMotorStatus(uint16_t newsts);
     // getters
     uint8_t getBoardId() const;
-    uint8_t getWindowNumber();
     uint32_t getFaults();
 
     WindowMotor motA;
