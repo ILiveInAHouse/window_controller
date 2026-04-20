@@ -16,7 +16,7 @@
 // Namespace definition
 namespace esphome::window_controller {
 
-enum WhichMotorEnum { MOTOR_A = 0, MOTOR_B = 1 };
+enum WhichMotorEnum { MOTOR_NONE = 0, MOTOR_A = 1, MOTOR_B = 2 };
 
 // Forward declare WindowControllerClient
 class WindowControllerClient;
@@ -61,6 +61,7 @@ class WindowMotor {
     bool getShuntVoltage(float *shunt_voltage_mv);
     uint8_t getWindowNumber();
     uint32_t getFaults();
+    bool getIsMotorA();
 
     i2c::I2CDevice ina219;  // current sensor
     uint8_t boardId;

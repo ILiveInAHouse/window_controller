@@ -209,6 +209,10 @@ uint8_t WindowMotor::getWindowNumber() {
     return this->windowNumber;
 }
 
+bool WindowMotor::getIsMotorA() {
+    return this->isMotorA;
+}
+
 uint32_t WindowMotor::getFaults() {
     return this->faults;
 }
@@ -286,6 +290,12 @@ void WindowController::setup() {
         return;
     }
     delay(1);
+
+    // each component type (sensor, fan, etc) is a new child
+    // each component type's device_id specified in the .yaml is a new child
+    for (auto *child : this->children_) {
+        child->child_setup();
+    }
 }
 
 //void ExampleComponent::loop() {

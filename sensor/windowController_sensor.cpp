@@ -7,6 +7,10 @@ namespace window_controller {
 
 static const char *const TAG = "windowcontroller.sensor";
 
+void WindowControllerSensor::child_setup() {
+
+}
+
 void WindowControllerSensor::setup() {
   if (this->whichMotor == MOTOR_A) {
     this->motorClassPtr = &this->parent_->motA;

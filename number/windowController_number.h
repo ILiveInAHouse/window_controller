@@ -16,7 +16,7 @@ class WindowControllerNumber : public WindowControllerClient, public number::Num
  public:
   WindowControllerNumber();
   void dump_config() override;
-  void setup() override;
+  void child_setup();
   void update() override;
   void control(float val) override;
   bool floatsNotEqual(float a, float b, float delta);
@@ -32,6 +32,7 @@ class WindowControllerNumber : public WindowControllerClient, public number::Num
 
  protected:
     number::Number *target_position_number_{nullptr};
+    int initVal;
 
 };
 

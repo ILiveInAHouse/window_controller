@@ -65,5 +65,10 @@ number:
     target_position:
       device_id: motor_A_device
       name: "Window A Control" # needed id and name to avoid being "internal" component
+  - platform: window_controller
+    which_motor: MOTOR_B
+    target_position:
+      device_id: motor_B_device
+      name: "Window B Control" # needed id and name to avoid being "internal" component
     #unit_of_measurement: "%"
 ```

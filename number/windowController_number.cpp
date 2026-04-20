@@ -8,10 +8,14 @@ namespace window_controller {
 static const char *const TAG = "windowcontroller.number";
 
 WindowControllerNumber::WindowControllerNumber() {
-
+  this->initVal = 0;
+  this->whichMotor = MOTOR_NONE;
 }
 
-void WindowControllerNumber::setup() {
+void WindowControllerNumber::child_setup() {
+  // setup() doesn't seem to run.  Don't know why.
+  // FIXME: is it because windowControllerChild.h doesn't define setup()?
+  this->initVal = 2;
   if (this->whichMotor == MOTOR_A) {
     this->motorClassPtr = &this->parent_->motA;
   } else {
@@ -20,6 +24,15 @@ void WindowControllerNumber::setup() {
 }
 
 void WindowControllerNumber::control(float val) {
+  ESP_LOGD(TAG, "initVal=%d whichMotor=%d motorClassPtr=%p motA=%p motB=%p", 
+    this->initVal, this->whichMotor, this->motorClassPtr, this->parent_->motA, this->parent_->motB);
+  // if (this->motorClassPtr) {
+  //   ESP_LOGD(TAG, "control motor%c: isMotorA: %d targetPos=%f", 
+  //       (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->motorClassPtr->getIsMotorA(), 
+  //       val);
+  // } else {
+  //   ESP_LOGD(TAG, "control %f: motorClassPtr is null", val);
+  // }
   this->publish_state(val);
 }
 
@@ -35,11 +48,11 @@ bool WindowControllerNumber::floatsNotEqual(float a, float b, float delta) {
 
 void WindowControllerNumber::publish_info() {
   if (this->motorClassPtr) {
-    float targetPos_ = this->motorClassPtr->targetPosition;
+    //float targetPos_ = this->motorClassPtr->targetPosition;
     // ESP_LOGD(TAG, "winNum=%d get_state=%f state-winNum=%f", winNum_, this->window_number_sensor_->get_state(), winNum_ - this->window_number_sensor_->get_state());
     // if (this->floatsNotEqual(this->target_position_->state, targetPos_, 0.1f)) {
-      ESP_LOGD(TAG, "motor%c: targetPos=%f", (this->whichMotor == MOTOR_A) ? 'A' : 'B', targetPos_);
-      this->target_position_number_->publish_state(targetPos_);
+      //ESP_LOGD(TAG, "motor%c: targetPos=%f", (this->whichMotor == MOTOR_A) ? 'A' : 'B', targetPos_);
+      //this->target_position_number_->publish_state(targetPos_);
     // }
   }
 }

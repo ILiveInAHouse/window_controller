@@ -27,6 +27,7 @@ class WindowControllerSensor : public WindowControllerClient, public PollingComp
   void set_whichMotor(WhichMotorEnum whichMotor_) {
     this->whichMotor = whichMotor_;
   }
+  void child_setup();
   void publish_info();
   WhichMotorEnum whichMotor;
   WindowMotor *motorClassPtr;

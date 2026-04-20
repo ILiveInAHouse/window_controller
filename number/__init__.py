@@ -22,6 +22,7 @@ WindowControllerNumber = winctrl_ns.class_(
 
 WhichMotor = winctrl_ns.enum("WhichMotorEnum")
 MOTOR_ENUMS = {
+    "MOTOR_NONE": WhichMotor.MOTOR_NONE,
     "MOTOR_A": WhichMotor.MOTOR_A,
     "MOTOR_B": WhichMotor.MOTOR_B,
 }
