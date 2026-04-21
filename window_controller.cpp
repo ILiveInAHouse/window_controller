@@ -245,13 +245,13 @@ void WindowMotor::update() {
             bus_voltage_v, current_a);
 }
 
-WindowController::WindowController() {
+WindowControllerHub::WindowControllerHub() {
     // Constructor
     // Initialize class fields and configurations
     this->shutdownImminent = false;
 }
 
-void WindowController::setup() {
+void WindowControllerHub::setup() {
     // setup hardware
     this->boardId = 0xFF;
     if ((this->boardid0_pin_ == nullptr) || 
@@ -306,7 +306,7 @@ void WindowController::setup() {
   // https://developers.esphome.io/architecture/components/advanced/#component-loop-control
 //}
 
-void WindowController::update() {
+void WindowControllerHub::update() {
     if (this->shutdownImminent) {
         return;
     }
@@ -326,7 +326,7 @@ void WindowController::update() {
     this->publish_info_();
 }
 
-void WindowController::publish_info_() {
+void WindowControllerHub::publish_info_() {
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
@@ -334,21 +334,21 @@ void WindowController::publish_info_() {
     }
 }
 
-void WindowController::setAllMotorStatus(uint16_t newsts) {
+void WindowControllerHub::setAllMotorStatus(uint16_t newsts) {
     this->motA.setAllMotorStatus(newsts);
     this->motB.setAllMotorStatus(newsts);
 }
 
-uint8_t WindowController::getBoardId() const { return this->boardId; }
+uint8_t WindowControllerHub::getBoardId() const { return this->boardId; }
 
-uint32_t WindowController::getFaults() {
+uint32_t WindowControllerHub::getFaults() {
     return this->motA.getFaults();
 }
 
 // Called once after booting and then each time a new client connects
 //   to monitor logs
-void WindowController::dump_config() {
-    ESP_LOGCONFIG(TAG, "WindowController:");
+void WindowControllerHub::dump_config() {
+    ESP_LOGCONFIG(TAG, "WindowControllerHub:");
     LOG_I2C_DEVICE(this);
 
     if (this->is_failed()) {
@@ -378,7 +378,7 @@ void WindowController::dump_config() {
 //   return setup_priority::DATA;
 // }
 
-void WindowController::on_safe_shutdown() {
+void WindowControllerHub::on_safe_shutdown() {
   // Optional: Critical cleanup operations for safe shutdowns only
   // This is called first, before any other shutdown procedures
   // ESP_LOGI(TAG, "Safe shutdown initiated");
@@ -387,14 +387,14 @@ void WindowController::on_safe_shutdown() {
   this->shutdownImminent = true;
 }
 
-void WindowController::on_shutdown() {
+void WindowControllerHub::on_shutdown() {
   // Optional: Start shutdown process
   // For example, send a disconnect message but don't close connections yet
   // ESP_LOGI(TAG, "Starting shutdown");
   this->shutdownImminent = true;
 }
 
-// void WindowController::on_powerdown() {
+// void WindowControllerHub::on_powerdown() {
 // }
 
 // bool ExampleComponent::teardown() {
@@ -408,7 +408,7 @@ void WindowController::on_shutdown() {
 //   return true;
 // }
 
-void WindowController::register_child(WindowControllerClient *obj) {
+void WindowControllerHub::register_child(WindowControllerClient *obj) {
   this->children_.push_back(obj);
   obj->set_parent(this);
 }

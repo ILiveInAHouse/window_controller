@@ -5,10 +5,10 @@
 namespace esphome {
 namespace window_controller {
 
-// Forward declare WindowController
-class WindowController;
+// Forward declare WindowControllerHub
+class WindowControllerHub;
 
-class WindowControllerClient : public Parented<WindowController> {
+class WindowControllerClient : public Parented<WindowControllerHub> {
  public:
 //   virtual void on_status(const BedjetStatusPacket *data) = 0;
 //   virtual void on_bedjet_state(bool is_ready) = 0;
@@ -16,7 +16,7 @@ class WindowControllerClient : public Parented<WindowController> {
   virtual void publish_info() = 0;
 
  protected:
-  friend WindowController;
+  friend WindowControllerHub;
 //   virtual std::string describe() = 0;
 };
 

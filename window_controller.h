@@ -93,10 +93,10 @@ class WindowMotor {
     uint32_t calibration_lsb_;
 };
 
-class WindowController : public PollingComponent, public i2c::I2CDevice {
+class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
   public:
     // Constructor
-    WindowController();
+    WindowControllerHub();
     
     // Standard component functions to override
     void setup() override;

@@ -35,9 +35,8 @@ CONF_MOTBIN2_PIN = "motb_in2_pin"
 # C++ namespace
 winctrl_ns = cg.esphome_ns.namespace("window_controller")
 # Create class and inherit from
-#WindowController = ns.class_("WindowController", cg.PollingComponent, ina219.INA219Component)
 # also look at uart.UARTDevice as an example
-WindowController = winctrl_ns.class_("WindowController", cg.PollingComponent, i2c.I2CDevice)
+WindowControllerHub = winctrl_ns.class_("WindowControllerHub", cg.PollingComponent, i2c.I2CDevice)
 
 # Look at Parent Hub and Child components
 # Look at cv.use_id
@@ -50,7 +49,7 @@ CONF_MOTB_INA219_ADDRESS = "motb_ina219_address"
 CONFIG_SCHEMA = (
     cv.COMPONENT_SCHEMA.extend(
         {
-            cv.GenerateID(): cv.declare_id(WindowController),
+            cv.GenerateID(): cv.declare_id(WindowControllerHub),
             # Schema definition, containing the options available for the component
             cv.Required(CONF_MOTA_INA219_ADDRESS): cv.i2c_address,
             cv.Required(CONF_MOTB_INA219_ADDRESS): cv.i2c_address,
@@ -80,7 +79,7 @@ CONFIG_SCHEMA = (
 
 WINDOWCONTROLLER_CLIENT_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(CONF_WINDOWCONTROLLER_ID): cv.use_id(WindowController),
+        cv.GenerateID(CONF_WINDOWCONTROLLER_ID): cv.use_id(WindowControllerHub),
     }
 )
 
