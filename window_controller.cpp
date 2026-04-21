@@ -6,6 +6,14 @@ namespace esphome::window_controller {
 
 static const char *TAG = "window_controller_hub.component";
 
+void WindowPositionNumber::control(float value) {
+    this->publish_state(value);
+    // You can also call a parent method here if you want
+    if (this->parent_ != nullptr) {
+        this->parent_->print_number_change(value);
+    }
+}
+
 static const uint8_t INA219_READ = 0x01;
 static const uint8_t INA219_REGISTER_CONFIG = 0x00;
 static const uint8_t INA219_REGISTER_SHUNT_VOLTAGE = 0x01;
@@ -413,5 +421,8 @@ void WindowControllerHub::register_child(WindowControllerClient *obj) {
   obj->set_parent(this);
 }
 
+void WindowControllerHub::print_number_change(float new_n) {
+    ESP_LOGI(TAG, "new_n=%f", new_n);
+}
 
 }  // namespace esphome::window_controller

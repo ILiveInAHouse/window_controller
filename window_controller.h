@@ -4,6 +4,7 @@
 #include "esphome/core/gpio.h"
 #include "esphome/components/i2c/i2c.h"
 #include "window_controller_child.h"
+#include "esphome/components/number/number.h"
 
 // window motor faults
 #define WINMOTFAULT_PIN_NULL 0x0
@@ -18,8 +19,19 @@ namespace esphome::window_controller {
 
 enum WhichMotorEnum { MOTOR_NONE = 0, MOTOR_A = 1, MOTOR_B = 2 };
 
-// Forward declare WindowControllerClient
+// Forward declarations
 class WindowControllerClient;
+class WindowControllerHub;
+
+// Create a non-abstract number class
+class WindowPositionNumber : public number::Number {
+public:
+  // Store a pointer to the parent hub
+  void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
+protected:
+  WindowControllerHub *parent_;
+  void control(float value) override;
+};
 
 class WindowMotor {
 
@@ -105,6 +117,8 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     void on_safe_shutdown() override;
     void on_shutdown() override;
 
+    void print_number_change(float new_n);
+
     // Add any setters of configuration variables
     void set_boardid0_pin(InternalGPIOPin *pin) {boardid0_pin_ = pin;}
     void set_boardid1_pin(InternalGPIOPin *pin) {boardid1_pin_ = pin;}
@@ -131,6 +145,19 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
   
     void register_child(WindowControllerClient *obj);
 
+    // This is called by the Python code to link the UI slider to this class
+    void set_window_position_number(WindowPositionNumber *n) {
+      this->percentage_number_ = n;
+      // Tell the child who its parent is
+      this->percentage_number_->set_parent(this);
+
+      // Instead of a parent pointer, you can register a callback that
+      //   runs the parent's method
+      // this->percentage_number_->add_on_state_callback([this](float value) {
+      //     this->on_slider_changed(value);
+      // });
+    }
+
   protected:
     std::vector<WindowControllerClient *> children_;
     void publish_info_();
@@ -154,7 +181,9 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     uint8_t boardId{0};
     uint32_t faults{0};
     bool shutdownImminent{false};
-    
+
+    WindowPositionNumber *percentage_number_{ nullptr };
+
 };
 
 }  // namespace esphome::window_controller

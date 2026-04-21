@@ -40,6 +40,7 @@ window_controller:
   motb_pwm_pin: GPIO6
   motb_in1_pin: GPIO37
   motb_in2_pin: GPIO38
+  id: window_controller_hub_id
 
 sensor:
   - platform: window_controller
@@ -61,14 +62,9 @@ sensor:
 
 number:
   - platform: window_controller
-    which_motor: MOTOR_A
-    target_position:
-      device_id: motor_A_device
-      name: "Window A Control" # needed id and name to avoid being "internal" component
-  - platform: window_controller
-    which_motor: MOTOR_B
-    target_position:
-      device_id: motor_B_device
-      name: "Window B Control" # needed id and name to avoid being "internal" component
-    #unit_of_measurement: "%"
+    window_controller_id: window_controller_hub_id
+    name: "Hub Position"
+    unit_of_measurement: "%"
+    icon: "mdi:gauge"
+    mode: SLIDER
 ```
