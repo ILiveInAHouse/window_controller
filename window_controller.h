@@ -3,7 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/gpio.h"
 #include "esphome/components/i2c/i2c.h"
-#include "windowControllerChild.h"
+#include "window_controller_child.h"
 
 // window motor faults
 #define WINMOTFAULT_PIN_NULL 0x0

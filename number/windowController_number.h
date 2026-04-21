@@ -5,8 +5,8 @@
 
 #include "esphome/components/number/number.h"
 
-#include "../windowController.h"
-#include "../windowControllerChild.h"
+#include "../window_controller.h"
+#include "../window_controller_child.h"
 
 namespace esphome {
 namespace window_controller {

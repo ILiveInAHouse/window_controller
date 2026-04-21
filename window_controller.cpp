@@ -1,6 +1,6 @@
 #include "esphome/core/log.h"
 #include "esphome/core/hal.h"
-#include "windowController.h"
+#include "window_controller.h"
 
 namespace esphome::window_controller {
 
