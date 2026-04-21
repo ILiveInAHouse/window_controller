@@ -160,7 +160,8 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
 
   protected:
     std::vector<WindowControllerClient *> children_;
-    void publish_info_();
+    void all_children_publish_info();
+    void all_children_update();
     // Internal fields definition
     InternalGPIOPin *boardid0_pin_{nullptr};
     InternalGPIOPin *boardid1_pin_{nullptr};

@@ -19,6 +19,10 @@ void WindowControllerSensor::setup() {
   }
 }
 
+void WindowControllerSensor::child_update() {
+
+}
+
 bool WindowControllerSensor::floatsNotEqual(float a, float b, float delta) {
   if (std::isnan(a) || std::isnan(b) || std::isnan(delta)) {
     return true;
@@ -29,7 +33,7 @@ bool WindowControllerSensor::floatsNotEqual(float a, float b, float delta) {
   return false;
 }
 
-void WindowControllerSensor::publish_info() {
+void WindowControllerSensor::child_publish_info() {
   if (this->motorClassPtr) {
     uint8_t winNum_ = this->motorClassPtr->getWindowNumber();
     // ESP_LOGD(TAG, "winNum=%d get_state=%f state-winNum=%f", winNum_, this->window_number_sensor_->get_state(), winNum_ - this->window_number_sensor_->get_state());

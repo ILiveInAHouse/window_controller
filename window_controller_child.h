@@ -13,7 +13,8 @@ class WindowControllerClient : public Parented<WindowControllerHub> {
 //   virtual void on_status(const BedjetStatusPacket *data) = 0;
 //   virtual void on_bedjet_state(bool is_ready) = 0;
   virtual void child_setup() = 0;
-  virtual void publish_info() = 0;
+  virtual void child_publish_info() = 0;
+  virtual void child_update() = 0;
 
  protected:
   friend WindowControllerHub;

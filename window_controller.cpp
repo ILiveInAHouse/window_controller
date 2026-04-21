@@ -331,14 +331,23 @@ void WindowControllerHub::update() {
     this->motB.boardId = this->boardId;
     this->motB.update();
 
-    this->publish_info_();
+    this->all_children_publish_info();
+    this->all_children_update();
 }
 
-void WindowControllerHub::publish_info_() {
+void WindowControllerHub::all_children_update() {
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
-        child->publish_info();
+        child->child_update();
+    }
+}
+
+void WindowControllerHub::all_children_publish_info() {
+    // each component type (sensor, fan, etc) is a new child
+    // each component type's device_id specified in the .yaml is a new child
+    for (auto *child : this->children_) {
+        child->child_publish_info();
     }
 }
 
