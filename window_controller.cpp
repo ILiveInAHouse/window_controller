@@ -4,7 +4,7 @@
 
 namespace esphome::window_controller {
 
-static const char *TAG = "window_controller.component";
+static const char *TAG = "window_controller_hub.component";
 
 static const uint8_t INA219_READ = 0x01;
 static const uint8_t INA219_REGISTER_CONFIG = 0x00;

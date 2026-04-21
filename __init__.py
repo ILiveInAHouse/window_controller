@@ -33,10 +33,10 @@ CONF_MOTBIN1_PIN = "motb_in1_pin"
 CONF_MOTBIN2_PIN = "motb_in2_pin"
 
 # C++ namespace
-winctrl_ns = cg.esphome_ns.namespace("window_controller")
+window_controller_ns = cg.esphome_ns.namespace("window_controller")
 # Create class and inherit from
 # also look at uart.UARTDevice as an example
-WindowControllerHub = winctrl_ns.class_("WindowControllerHub", cg.PollingComponent, i2c.I2CDevice)
+WindowControllerHub = window_controller_ns.class_("WindowControllerHub", cg.PollingComponent, i2c.I2CDevice)
 
 # Look at Parent Hub and Child components
 # Look at cv.use_id

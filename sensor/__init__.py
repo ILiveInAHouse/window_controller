@@ -8,8 +8,8 @@ from esphome.const import (
 )
 
 # modeled off of ads1115 which has only 1 sensor value
-#from .. import CONF_WINDOWCONTROLLER_ID, WindowController, winctrl_ns
-from .. import WINDOWCONTROLLER_CLIENT_SCHEMA, winctrl_ns, register_windowcontroller_child
+#from .. import CONF_WINDOWCONTROLLER_ID, WindowController, window_controller_ns
+from .. import WINDOWCONTROLLER_CLIENT_SCHEMA, window_controller_ns, register_windowcontroller_child
 # bedjet component has multiple sensor values
 #   .yaml document: https://esphome.io/components/climate/bedjet/#bedjet-sensor
 
@@ -20,11 +20,11 @@ CONF_WINDOW_NUMBER = "window_number"
 CONF_FAULTS = "faults"
 CONF_WHICH_MOTOR = "which_motor"
 
-WindowControllerSensor = winctrl_ns.class_(
+WindowControllerSensor = window_controller_ns.class_(
     "WindowControllerSensor", cg.PollingComponent
 )
 
-WhichMotor = winctrl_ns.enum("WhichMotorEnum")
+WhichMotor = window_controller_ns.enum("WhichMotorEnum")
 MOTOR_ENUMS = {
     "MOTOR_NONE": WhichMotor.MOTOR_NONE,
     "MOTOR_A": WhichMotor.MOTOR_A,
