@@ -12,6 +12,7 @@ void WindowMotorClass::setup() {
 }
 
 void WindowMotorClass::update() {
+   // Called at WindowMotorClass polling rate
    ESP_LOGI(TAG, "motor=%c update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
 }
 
@@ -22,6 +23,8 @@ void WindowMotorClass::child_publish_info() {
 }
 
 void WindowMotorClass::child_update() {
+   // Called from parent hub.
+   // Could do some synch work here.
    ESP_LOGI(TAG, "motor=%c child_update setup_called=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->setup_called);
 }
 

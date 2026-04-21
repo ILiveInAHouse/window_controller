@@ -31,8 +31,9 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(): cv.declare_id(WindowMotorClass),
         cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
     }
-    .extend(cv.polling_component_schema("2s"))
-) .extend(WINDOWCONTROLLER_CLIENT_SCHEMA)
+)
+CONFIG_SCHEMA = CONFIG_SCHEMA.extend(cv.polling_component_schema("2s"))
+CONFIG_SCHEMA = CONFIG_SCHEMA.extend(WINDOWCONTROLLER_CLIENT_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
