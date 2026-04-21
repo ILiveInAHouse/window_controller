@@ -5,19 +5,25 @@
 namespace esphome {
 namespace window_controller {
 
-   static const char *const TAG = "windowmotor";
+static const char *const TAG = "windowmotor";
 
-void WindowMotorClass::child_setup() {
+void WindowMotorClass::setup() {
+   this->setup_called = true;
 }
 
 void WindowMotorClass::update() {
+   ESP_LOGI(TAG, "motor=%c update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
+}
+
+void WindowMotorClass::child_setup() {
 }
 
 void WindowMotorClass::child_publish_info() {
 }
 
 void WindowMotorClass::child_update() {
-   ESP_LOGI(TAG, "motor=%c child_update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
+   ESP_LOGI(TAG, "motor=%c child_update setup_called=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->setup_called);
 }
-}
-}
+
+} // namespace window_controller
+} // namespace esphome

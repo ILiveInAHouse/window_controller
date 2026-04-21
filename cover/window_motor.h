@@ -11,14 +11,18 @@ namespace window_controller {
 
 class WindowMotorClass : public WindowControllerClient, public PollingComponent {
    public:
+      void setup() override;
+      void update() override;
       void set_whichMotor(WhichMotorEnum whichMotor_) {
          this->whichMotor = whichMotor_;
       }
       WhichMotorEnum whichMotor;
-      void update() override;
       void child_setup();
       void child_publish_info();
       void child_update();
+   protected:
+      bool setup_called = false;
 };
-}
-}
+
+} // namespace window_controller
+} // namespace esphome

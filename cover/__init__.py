@@ -31,7 +31,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(): cv.declare_id(WindowMotorClass),
         cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
     }
-#    .extend(cv.polling_component_schema("5s"))
+    .extend(cv.polling_component_schema("2s"))
 ) .extend(WINDOWCONTROLLER_CLIENT_SCHEMA)
 
 async def to_code(config):
