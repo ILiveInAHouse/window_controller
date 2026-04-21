@@ -13,7 +13,7 @@ DEPENDENCIES = ["i2c"]
 AUTO_LOAD = [ ]
 MULTI_CONF = True
 
-CONF_WINDOWCONTROLLER_ID = "windowcontroller_id"
+CONF_WINDOWCONTROLLER_ID = "window_controller_id"
 
 # Define constants for configuration keys
 CONF_BOARDID0_PIN = "boardid0_pin"

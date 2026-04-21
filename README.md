@@ -63,8 +63,25 @@ sensor:
 number:
   - platform: window_controller
     window_controller_id: window_controller_hub_id
-    name: "Hub Position"
+    name: "Hub Position A"
     unit_of_measurement: "%"
     icon: "mdi:gauge"
     mode: SLIDER
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    name: "Hub Position B"
+    unit_of_measurement: "%"
+    icon: "mdi:gauge"
+    mode: SLIDER
+
+cover:
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    # device_class: window
+    which_motor: MOTOR_A
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    # device_class: window
+    which_motor: MOTOR_B
+
 ```
