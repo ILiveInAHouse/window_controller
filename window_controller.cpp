@@ -8,6 +8,7 @@ static const char *TAG = "window_controller_hub.component";
 
 void WindowPositionNumber::control(float value) {
     this->publish_state(value);
+    ESP_LOGD("custom", "Slider value changed to: %f", value);
     // You can also call a parent method here if you want
     if (this->parent_ != nullptr) {
         this->parent_->print_number_change(value);

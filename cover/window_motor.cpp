@@ -22,6 +22,10 @@ void WindowMotorClass::child_setup() {
 void WindowMotorClass::child_publish_info() {
 }
 
+void WindowMotorClass::motor_setup(uint8_t boardid) {
+   this->boardid = boardid;
+}
+
 void WindowMotorClass::child_update() {
    // Called from parent hub.
    // Could do some synch work here.

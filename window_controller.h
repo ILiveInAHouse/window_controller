@@ -146,10 +146,21 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     void register_child(WindowControllerClient *obj);
 
     // This is called by the Python code to link the UI slider to this class
-    void set_window_position_number(WindowPositionNumber *n) {
-      this->percentage_number_ = n;
+    void set_speed_slider(WindowPositionNumber *n) {
+      this->speed_slider_ = n;
       // Tell the child who its parent is
-      this->percentage_number_->set_parent(this);
+      this->speed_slider_->set_parent(this);
+
+      // Instead of a parent pointer, you can register a callback that
+      //   runs the parent's method
+      // this->percentage_number_->add_on_state_callback([this](float value) {
+      //     this->on_slider_changed(value);
+      // });
+    }
+    void set_calibration_slider(WindowPositionNumber *n) {
+      this->calibration_slider_ = n;
+      // Tell the child who its parent is
+      this->calibration_slider_->set_parent(this);
 
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method
@@ -183,7 +194,8 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     uint32_t faults{0};
     bool shutdownImminent{false};
 
-    WindowPositionNumber *percentage_number_{ nullptr };
+    WindowPositionNumber *speed_slider_{ nullptr };
+    WindowPositionNumber *calibration_slider_{ nullptr };
 
 };
 

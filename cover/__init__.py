@@ -32,7 +32,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
     }
 )
-CONFIG_SCHEMA = CONFIG_SCHEMA.extend(cv.polling_component_schema("2s"))
+CONFIG_SCHEMA = CONFIG_SCHEMA.extend(cv.polling_component_schema("10s"))
 CONFIG_SCHEMA = CONFIG_SCHEMA.extend(WINDOWCONTROLLER_CLIENT_SCHEMA)
 
 async def to_code(config):

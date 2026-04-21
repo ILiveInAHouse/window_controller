@@ -17,11 +17,16 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent 
          this->whichMotor = whichMotor_;
       }
       WhichMotorEnum whichMotor;
+      void motor_setup(uint8_t boardid);
       void child_setup();
       void child_publish_info();
       void child_update();
+
    protected:
       bool setup_called = false;
+      uint32_t faults;
+      uint8_t boardid;
+
 };
 
 } // namespace window_controller
