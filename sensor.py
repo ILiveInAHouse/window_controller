@@ -31,14 +31,8 @@ CONF_FAULTS = "faults"
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_WINDOW_CONTROLLER_ID): cv.use_id(WindowControllerHub),
     cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
-    cv.Optional(CONF_WINDOW_NUMBER): sensor.sensor_schema(
-        state_class=STATE_CLASS_MEASUREMENT,
-        entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-    ),
-    cv.Optional(CONF_FAULTS): sensor.sensor_schema(
-        state_class=STATE_CLASS_MEASUREMENT,
-        entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-    ),
+    cv.Optional(CONF_WINDOW_NUMBER): sensor.sensor_schema(WCSensor),
+    cv.Optional(CONF_FAULTS): sensor.sensor_schema(WCSensor),
 })
 
 async def to_code(config):
