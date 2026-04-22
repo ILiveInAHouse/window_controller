@@ -24,10 +24,14 @@ class WindowControllerClient;
 class WindowControllerHub;
 
 // Create a non-abstract number class
-class WindowPositionNumber : public number::Number {
+class WindowPositionNumber : public number::Number, public Component {
 public:
   // Store a pointer to the parent hub
   void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
+  // Adding this helps the compiler confirm it's a Component
+  void dump_config() override {
+    ESP_LOGCONFIG("custom", "Window Controller Slider");
+  }
 protected:
   WindowControllerHub *parent_;
   void control(float value) override;

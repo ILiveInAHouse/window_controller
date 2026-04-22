@@ -37,18 +37,8 @@ async def to_code(config):
     # Find the parent component
     parent = await cg.get_variable(config[CONF_WINDOW_CONTROLLER_ID])
     if speed_slider_conf := config.get("speed_slider"):
-        # Create the C++ Number object
-        var = cg.new_Pvariable(speed_slider_conf[CONF_ID])
-        await cg.register_component(var, speed_slider_conf)
-        await number.register_number(var, speed_slider_conf, min_value=0, max_value=100, step=1)
-        
-        # 3. Call the C++ setter function
+        var = await number.new_number(speed_slider_conf, min_value=0, max_value=100, step=1)
         cg.add(parent.set_speed_slider(var))
     if calibration_slider_conf := config.get("calibration_slider"):
-        # Create the C++ Number object
-        var = cg.new_Pvariable(speed_slider_conf[CONF_ID])
-        await cg.register_component(var, calibration_slider_conf)
-        await number.register_number(var, calibration_slider_conf, min_value=0, max_value=100, step=1)
-        
-        # 3. Call the C++ setter function
+        var = await number.new_number(calibration_slider_conf, min_value=0, max_value=100, step=1)
         cg.add(parent.set_calibration_slider(var))
