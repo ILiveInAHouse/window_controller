@@ -5,6 +5,7 @@
 #include "esphome/components/i2c/i2c.h"
 #include "window_controller_child.h"
 #include "esphome/components/number/number.h"
+#include "esphome/components/sensor/sensor.h"
 
 // window motor faults
 #define WINMOTFAULT_PIN_NULL 0x0
@@ -22,6 +23,18 @@ enum WhichMotorEnum { MOTOR_NONE = 0, MOTOR_A = 1, MOTOR_B = 2 };
 // Forward declarations
 class WindowControllerClient;
 class WindowControllerHub;
+
+// Create a non-abstract sensor class
+class WCSensor : public sensor::Sensor {
+public:
+  // Store a pointer to the parent hub
+  void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
+  void set_which_motor(WhichMotorEnum which) {this->whichMotor = which; }
+protected:
+  WindowControllerHub *parent_;
+  // void control(float value) override;
+  WhichMotorEnum whichMotor{MOTOR_NONE};
+};
 
 // Create a non-abstract number class
 class WCNumber : public number::Number {
@@ -171,6 +184,30 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       // });
     }
 
+    void set_window_number(WCSensor *s) {
+      this->window_number_ = s;
+      // Tell the child who its parent is
+      this->window_number_->set_parent(this);
+
+      // Instead of a parent pointer, you can register a callback that
+      //   runs the parent's method
+      // this->percentage_number_->add_on_state_callback([this](float value) {
+      //     this->on_slider_changed(value);
+      // });
+    }
+
+    void set_faults(WCSensor *s) {
+      this->faults_ = s;
+      // Tell the child who its parent is
+      this->faults_->set_parent(this);
+
+      // Instead of a parent pointer, you can register a callback that
+      //   runs the parent's method
+      // this->percentage_number_->add_on_state_callback([this](float value) {
+      //     this->on_slider_changed(value);
+      // });
+    }
+
   protected:
     std::vector<WindowControllerClient *> children_;
     void all_children_publish_info();
@@ -196,9 +233,13 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     uint32_t faults{0};
     bool shutdownImminent{false};
 
+    // Controls
     WCNumber *target_position_{ nullptr };
     WCNumber *max_torque_{ nullptr };
 
+    // Status
+    WCSensor *window_number_{nullptr};
+    WCSensor *faults_{nullptr};
 };
 
 }  // namespace esphome::window_controller

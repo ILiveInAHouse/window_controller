@@ -44,6 +44,7 @@ window_controller:
 
 sensor:
   - platform: window_controller
+    window_controller_id: window_controller_hub_id
     which_motor: MOTOR_A
     window_number:
       device_id: motor_A_device
@@ -52,6 +53,7 @@ sensor:
       device_id: motor_A_device
       name: "Faults"
   - platform: window_controller
+    window_controller_id: window_controller_hub_id
     which_motor: MOTOR_B
     window_number:
       device_id: motor_B_device
@@ -59,20 +61,6 @@ sensor:
     faults:
       device_id: motor_B_device
       name: "Faults"
-
-number:
-  - platform: window_controller
-    window_controller_id: window_controller_hub_id
-    name: "Hub Position A"
-    unit_of_measurement: "%"
-    icon: "mdi:gauge"
-    mode: SLIDER
-  - platform: window_controller
-    window_controller_id: window_controller_hub_id
-    name: "Hub Position B"
-    unit_of_measurement: "%"
-    icon: "mdi:gauge"
-    mode: SLIDER
 
 cover:
   - platform: window_controller
@@ -83,5 +71,27 @@ cover:
     window_controller_id: window_controller_hub_id
     # device_class: window
     which_motor: MOTOR_B
+
+number:
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    target_position:
+      name: "Target Position"
+      which_motor: MOTOR_A
+      device_id: motor_A_device
+    max_torque:
+      name: "Max Torque"
+      which_motor: MOTOR_A
+      device_id: motor_A_device
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    target_position:
+      name: "Target Position"
+      which_motor: MOTOR_B
+      device_id: motor_B_device
+    max_torque:
+      name: "Max Torque"
+      which_motor: MOTOR_B
+      device_id: motor_B_device
 
 ```

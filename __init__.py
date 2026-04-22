@@ -11,7 +11,6 @@ from esphome.const import (
 CODEOWNERS = ["@ILiveInAHouse"]
 DEPENDENCIES = ["i2c"]
 AUTO_LOAD = [ ]
-MULTI_CONF = True
 
 CONF_WINDOWCONTROLLER_ID = "window_controller_id"
 
