@@ -6,6 +6,9 @@
 #include "window_controller_child.h"
 #include "esphome/components/number/number.h"
 #include "esphome/components/sensor/sensor.h"
+#include "wc_number.h"
+#include "wc_whichmotor.h"
+#include "wc_sensor.h"
 
 // window motor faults
 #define WINMOTFAULT_PIN_NULL 0x0
@@ -18,35 +21,9 @@
 // Namespace definition
 namespace esphome::window_controller {
 
-enum WhichMotorEnum { MOTOR_NONE = 0, MOTOR_A = 1, MOTOR_B = 2 };
-
 // Forward declarations
 class WindowControllerClient;
 class WindowControllerHub;
-
-// Create a non-abstract sensor class
-class WCSensor : public sensor::Sensor {
-public:
-  // Store a pointer to the parent hub
-  void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
-  void set_which_motor(WhichMotorEnum which) {this->whichMotor = which; }
-protected:
-  WindowControllerHub *parent_;
-  // void control(float value) override;
-  WhichMotorEnum whichMotor{MOTOR_NONE};
-};
-
-// Create a non-abstract number class
-class WCNumber : public number::Number {
-public:
-  // Store a pointer to the parent hub
-  void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
-  void set_which_motor(WhichMotorEnum which) {this->whichMotor = which; }
-protected:
-  WindowControllerHub *parent_;
-  void control(float value) override;
-  WhichMotorEnum whichMotor{MOTOR_NONE};
-};
 
 class WindowMotor {
 
@@ -165,6 +142,12 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       this->target_position_ = n;
       // Tell the child who its parent is
       this->target_position_->set_parent(this);
+
+      for (auto *child : this->children_) {
+        if (child->getWhichMotor() == n->whichMotor) {
+          child->linkTargetPosition(this->target_position_);
+        }
+      }
 
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method

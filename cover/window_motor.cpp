@@ -16,6 +16,14 @@ void WindowMotorClass::update() {
    ESP_LOGI(TAG, "motor=%c update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
 }
 
+WhichMotorEnum WindowMotorClass::getWhichMotor() {
+   return this->whichMotor;
+}
+
+void WindowMotorClass::linkTargetPosition(WCNumber *tpos) {
+   this->targetPosition = tpos;
+}
+
 void WindowMotorClass::child_setup() {
 }
 
