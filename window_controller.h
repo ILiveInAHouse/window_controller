@@ -24,14 +24,10 @@ class WindowControllerClient;
 class WindowControllerHub;
 
 // Create a non-abstract number class
-class WindowPositionNumber : public number::Number, public Component {
+class WindowPositionNumber : public number::Number {
 public:
   // Store a pointer to the parent hub
   void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
-  // Adding this helps the compiler confirm it's a Component
-  void dump_config() override {
-    ESP_LOGCONFIG("custom", "Window Controller Slider");
-  }
 protected:
   WindowControllerHub *parent_;
   void control(float value) override;
@@ -150,10 +146,10 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     void register_child(WindowControllerClient *obj);
 
     // This is called by the Python code to link the UI slider to this class
-    void set_speed_slider(WindowPositionNumber *n) {
-      this->speed_slider_ = n;
+    void set_target_position(WindowPositionNumber *n) {
+      this->target_position_ = n;
       // Tell the child who its parent is
-      this->speed_slider_->set_parent(this);
+      this->target_position_->set_parent(this);
 
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method
@@ -161,10 +157,10 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       //     this->on_slider_changed(value);
       // });
     }
-    void set_calibration_slider(WindowPositionNumber *n) {
-      this->calibration_slider_ = n;
+    void set_max_torque(WindowPositionNumber *n) {
+      this->max_torque_ = n;
       // Tell the child who its parent is
-      this->calibration_slider_->set_parent(this);
+      this->max_torque_->set_parent(this);
 
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method
@@ -198,8 +194,8 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     uint32_t faults{0};
     bool shutdownImminent{false};
 
-    WindowPositionNumber *speed_slider_{ nullptr };
-    WindowPositionNumber *calibration_slider_{ nullptr };
+    WindowPositionNumber *target_position_{ nullptr };
+    WindowPositionNumber *max_torque_{ nullptr };
 
 };
 
