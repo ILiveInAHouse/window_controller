@@ -24,13 +24,15 @@ class WindowControllerClient;
 class WindowControllerHub;
 
 // Create a non-abstract number class
-class WindowPositionNumber : public number::Number {
+class WCNumber : public number::Number {
 public:
   // Store a pointer to the parent hub
   void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
+  void set_which_motor(WhichMotorEnum which) {this->whichMotor = which; }
 protected:
   WindowControllerHub *parent_;
   void control(float value) override;
+  WhichMotorEnum whichMotor{MOTOR_NONE};
 };
 
 class WindowMotor {
@@ -146,7 +148,7 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     void register_child(WindowControllerClient *obj);
 
     // This is called by the Python code to link the UI slider to this class
-    void set_target_position(WindowPositionNumber *n) {
+    void set_target_position(WCNumber *n) {
       this->target_position_ = n;
       // Tell the child who its parent is
       this->target_position_->set_parent(this);
@@ -157,7 +159,7 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       //     this->on_slider_changed(value);
       // });
     }
-    void set_max_torque(WindowPositionNumber *n) {
+    void set_max_torque(WCNumber *n) {
       this->max_torque_ = n;
       // Tell the child who its parent is
       this->max_torque_->set_parent(this);
@@ -194,8 +196,8 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     uint32_t faults{0};
     bool shutdownImminent{false};
 
-    WindowPositionNumber *target_position_{ nullptr };
-    WindowPositionNumber *max_torque_{ nullptr };
+    WCNumber *target_position_{ nullptr };
+    WCNumber *max_torque_{ nullptr };
 
 };
 
