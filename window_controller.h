@@ -32,9 +32,7 @@ class WindowMotor {
     // Constructor
     WindowMotor();
     
-    bool setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
-              InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
-              InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
+    bool setup(uint8_t boardId, bool isMotorA);
 
     void update();
 
@@ -43,9 +41,6 @@ class WindowMotor {
     // void dump_config() override;
     // void update() override;
 
-    bool assignMotorPins(InternalGPIOPin *enca_pin, 
-                        InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
-                        InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin);
     bool calcINA219config();
     bool powerdownINA219();
     void calcWinNumAndStsMsk();
@@ -73,12 +68,6 @@ class WindowMotor {
 
   protected:
     // Internal fields definition
-    InternalGPIOPin *encA_pin_{nullptr};
-    InternalGPIOPin *encB_pin_{nullptr};
-    InternalGPIOPin *pwm_pin_{nullptr};
-    InternalGPIOPin *in1_pin_{nullptr};
-    InternalGPIOPin *in2_pin_{nullptr};
-
     uint32_t faults;
     uint8_t windowNumber;
     uint16_t status;          // statusMask bit is set if this window has work to do
@@ -116,17 +105,6 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     void set_boardid1_pin(InternalGPIOPin *pin) {boardid1_pin_ = pin;}
     void set_boardid2_pin(InternalGPIOPin *pin) {boardid2_pin_ = pin;}
 
-    void set_mota_enca_pin(InternalGPIOPin *pin) {mota_enca_pin_ = pin;}
-    void set_mota_encb_pin(InternalGPIOPin *pin) {mota_encb_pin_ = pin;}
-    void set_mota_pwm_pin(InternalGPIOPin *pin) {mota_pwm_pin_ = pin;}
-    void set_mota_in1_pin(InternalGPIOPin *pin) {mota_in1_pin_ = pin;}
-    void set_mota_in2_pin(InternalGPIOPin *pin) {mota_in2_pin_ = pin;}
-
-    void set_motb_enca_pin(InternalGPIOPin *pin) {motb_enca_pin_ = pin;}
-    void set_motb_encb_pin(InternalGPIOPin *pin) {motb_encb_pin_ = pin;}
-    void set_motb_pwm_pin(InternalGPIOPin *pin) {motb_pwm_pin_ = pin;}
-    void set_motb_in1_pin(InternalGPIOPin *pin) {motb_in1_pin_ = pin;}
-    void set_motb_in2_pin(InternalGPIOPin *pin) {motb_in2_pin_ = pin;}
     void setAllMotorStatus(uint16_t newsts);
     // getters
     uint8_t getBoardId() const;
@@ -227,22 +205,11 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
     std::vector<WindowControllerClient *> children_;
     void all_children_publish_info();
     void all_children_update();
+    void all_children_dump_config();
     // Internal fields definition
     InternalGPIOPin *boardid0_pin_{nullptr};
     InternalGPIOPin *boardid1_pin_{nullptr};
     InternalGPIOPin *boardid2_pin_{nullptr};
-
-    InternalGPIOPin *mota_enca_pin_{nullptr};
-    InternalGPIOPin *mota_encb_pin_{nullptr};
-    InternalGPIOPin *mota_pwm_pin_{nullptr};
-    InternalGPIOPin *mota_in1_pin_{nullptr};
-    InternalGPIOPin *mota_in2_pin_{nullptr};
-
-    InternalGPIOPin *motb_enca_pin_{nullptr};
-    InternalGPIOPin *motb_encb_pin_{nullptr};
-    InternalGPIOPin *motb_pwm_pin_{nullptr};
-    InternalGPIOPin *motb_in1_pin_{nullptr};
-    InternalGPIOPin *motb_in2_pin_{nullptr};
 
     uint8_t boardId{0};
     uint32_t faults{0};

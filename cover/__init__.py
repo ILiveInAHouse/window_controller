@@ -1,4 +1,5 @@
 import esphome.codegen as cg
+from esphome import pins
 import esphome.config_validation as cv
 from esphome.const import (
     CONF_ID,
@@ -14,6 +15,11 @@ DEPENDENCIES = ["window_controller"]
 CONF_WINDOW_NUMBER = "window_number"
 CONF_FAULTS = "faults"
 CONF_WHICH_MOTOR = "which_motor"
+CONF_ENCA_PIN = "enca_pin"
+CONF_ENCB_PIN = "encb_pin"
+CONF_PWM_PIN = "pwm_pin"
+CONF_IN1_PIN = "in1_pin"
+CONF_IN2_PIN = "in2_pin"
 
 WindowMotorClass = window_controller_ns.class_(
     "WindowMotorClass", cg.PollingComponent
@@ -31,6 +37,11 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(WindowMotorClass),
         cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
+        cv.Required(CONF_ENCA_PIN): pins.gpio_input_pin_schema,
+        cv.Required(CONF_ENCB_PIN): pins.gpio_input_pin_schema,
+        cv.Required(CONF_PWM_PIN): pins.gpio_input_pin_schema,
+        cv.Required(CONF_IN1_PIN): pins.gpio_input_pin_schema,
+        cv.Required(CONF_IN2_PIN): pins.gpio_input_pin_schema,
     }
 )
 CONFIG_SCHEMA = CONFIG_SCHEMA.extend(cv.polling_component_schema("10s"))
@@ -41,3 +52,13 @@ async def to_code(config):
     await cg.register_component(var, config)
     await register_windowcontroller_child(var, config)
     cg.add(var.set_whichMotor(config[CONF_WHICH_MOTOR]))
+    pin = await cg.gpio_pin_expression(config[CONF_ENCA_PIN])
+    cg.add(var.set_enca_pin(pin))
+    pin = await cg.gpio_pin_expression(config[CONF_ENCB_PIN])
+    cg.add(var.set_encb_pin(pin))
+    pin = await cg.gpio_pin_expression(config[CONF_PWM_PIN])
+    cg.add(var.set_pwm_pin(pin))
+    pin = await cg.gpio_pin_expression(config[CONF_IN1_PIN])
+    cg.add(var.set_in1_pin(pin))
+    pin = await cg.gpio_pin_expression(config[CONF_IN2_PIN])
+    cg.add(var.set_in2_pin(pin))

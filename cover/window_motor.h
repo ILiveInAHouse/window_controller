@@ -24,9 +24,15 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent 
       void child_setup(WCMotorUI *ui);
       void child_publish_info();
       void child_update();
+      void child_dump_config();
       WhichMotorEnum getWhichMotor();
       WCMotorUI *ui;
       uint16_t statusMask;
+      void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
+      void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
+      void set_pwm_pin(InternalGPIOPin *pin) {pwm_pin_ = pin;}
+      void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
+      void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
 
    protected:
       bool setup_called = false;
@@ -34,6 +40,11 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent 
       uint8_t boardid;
       WCNumber *targetPosition;
       uint8_t windowNumber;
+      InternalGPIOPin *enca_pin_{nullptr};
+      InternalGPIOPin *encb_pin_{nullptr};
+      InternalGPIOPin *pwm_pin_{nullptr};
+      InternalGPIOPin *in1_pin_{nullptr};
+      InternalGPIOPin *in2_pin_{nullptr};
 
 };
 

@@ -56,6 +56,17 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
 void WindowMotorClass::child_publish_info() {
 }
 
+// Called once after booting and then each time a new client connects
+//   to monitor logs
+void WindowMotorClass::child_dump_config() {
+    LOG_PIN("  enca_pin: ", this->enca_pin_);
+    LOG_PIN("  encb_pin: ", this->encb_pin_);
+    LOG_PIN("  pwm_pin: ", this->pwm_pin_);
+    LOG_PIN("  in1_pin: ", this->in1_pin_);
+    LOG_PIN("  in2_pin: ", this->in2_pin_);
+
+}
+
 void WindowMotorClass::child_update() {
    // Called from parent hub.
    // Could do some synch work here.

@@ -30,16 +30,6 @@ window_controller:
   mota_ina219_address: 0x40
   motb_ina219_address: 0x41
   address: 0x20 # required to make schema happy, but not used
-  mota_enca_pin: GPIO14
-  mota_encb_pin: GPIO4
-  mota_pwm_pin: GPIO5
-  mota_in1_pin: GPIO35
-  mota_in2_pin: GPIO36
-  motb_enca_pin: GPIO17
-  motb_encb_pin: GPIO7
-  motb_pwm_pin: GPIO6
-  motb_in1_pin: GPIO37
-  motb_in2_pin: GPIO38
   id: window_controller_hub_id
 
 sensor:
@@ -67,10 +57,20 @@ cover:
     window_controller_id: window_controller_hub_id
     # device_class: window
     which_motor: MOTOR_A
+    enca_pin: GPIO14
+    encb_pin: GPIO4
+    pwm_pin: GPIO5
+    in1_pin: GPIO35
+    in2_pin: GPIO36
   - platform: window_controller
     window_controller_id: window_controller_hub_id
     # device_class: window
     which_motor: MOTOR_B
+    enca_pin: GPIO17
+    encb_pin: GPIO7
+    pwm_pin: GPIO6
+    in1_pin: GPIO37
+    in2_pin: GPIO38
 
 number:
   - platform: window_controller
@@ -93,5 +93,4 @@ number:
       name: "Max Torque"
       which_motor: MOTOR_B
       device_id: motor_B_device
-
 ```

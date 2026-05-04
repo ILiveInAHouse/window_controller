@@ -52,24 +52,6 @@ WindowMotor::WindowMotor() {
 
 #define FUNC_OK 1
 #define FUNC_FAIL 0
-bool WindowMotor::assignMotorPins(InternalGPIOPin *enca_pin, 
-                        InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
-                        InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
-    if ((enca_pin == nullptr) || 
-        (encb_pin == nullptr) || 
-        (pwm_pin == nullptr) || 
-        (in1_pin == nullptr) || 
-        (in2_pin == nullptr)) {
-        return FUNC_FAIL;
-    }
-    this->encA_pin_ = enca_pin;
-    this->encB_pin_ = encb_pin;
-    this->pwm_pin_ = pwm_pin;
-    this->in1_pin_ = in1_pin;
-    this->in2_pin_ = in2_pin;
-    return FUNC_OK;
-}
-
 bool WindowMotor::calcINA219config() {
     uint16_t config = 0x0000;
     // INA219 config
@@ -197,15 +179,8 @@ uint32_t WindowMotor::getFaults() {
     return this->faults;
 }
 
-bool WindowMotor::setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pin, 
-                        InternalGPIOPin *encb_pin, InternalGPIOPin *pwm_pin, 
-                        InternalGPIOPin *in1_pin, InternalGPIOPin *in2_pin) {
+bool WindowMotor::setup(uint8_t boardId, bool isMotorA) {
     if (FUNC_FAIL == this->calcINA219config()) {
-        return FUNC_FAIL;
-    }
-    if (FUNC_FAIL == this->assignMotorPins(enca_pin, encb_pin, pwm_pin, 
-            in1_pin, in2_pin)) {
-        this->faults |= WINMOTFAULT_PIN_NULL;
         return FUNC_FAIL;
     }
     this->isMotorA = isMotorA;
@@ -260,16 +235,12 @@ void WindowControllerHub::setup() {
     this->motuiB.boardId = this->boardId;
 
     // setup MotorA
-    if (FUNC_FAIL == this->motA.setup(this->boardId, true, this->mota_enca_pin_, 
-            this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
-            this->mota_in2_pin_)) {
+    if (FUNC_FAIL == this->motA.setup(this->boardId, true)) {
         this->mark_failed();
         return;
     }
     // setup MotorB
-    if (FUNC_FAIL == this->motB.setup(this->boardId, false, this->mota_enca_pin_, 
-            this->mota_encb_pin_, this->mota_pwm_pin_, this->mota_in1_pin_,
-            this->mota_in2_pin_)) {
+    if (FUNC_FAIL == this->motB.setup(this->boardId, false)) {
         this->mark_failed();
         return;
     }
@@ -318,16 +289,16 @@ void WindowControllerHub::update() {
 }
 
 void WindowControllerHub::all_children_update() {
-    // each component type (sensor, fan, etc) is a new child
-    // each component type's device_id specified in the .yaml is a new child
+    // traditional hub architecture has each component type (sensor, fan, etc) is a new child
+    // I'm using these children to reference each motor
     for (auto *child : this->children_) {
         child->child_update();
     }
 }
 
 void WindowControllerHub::all_children_publish_info() {
-    // each component type (sensor, fan, etc) is a new child
-    // each component type's device_id specified in the .yaml is a new child
+    // traditional hub architecture has each component type (sensor, fan, etc) is a new child
+    // I'm using these children to reference each motor
     for (auto *child : this->children_) {
         child->child_publish_info();
     }
@@ -358,17 +329,15 @@ void WindowControllerHub::dump_config() {
     LOG_PIN("  boardId0_pin: ", this->boardid0_pin_);
     LOG_PIN("  boardId1_pin: ", this->boardid1_pin_);
     LOG_PIN("  boardId2_pin: ", this->boardid2_pin_);
-    LOG_PIN("  motaenca_pin: ", this->mota_enca_pin_);
-    LOG_PIN("  motaencb_pin: ", this->mota_encb_pin_);
-    LOG_PIN("  motapwm_pin: ", this->mota_pwm_pin_);
-    LOG_PIN("  motain1_pin: ", this->mota_in1_pin_);
-    LOG_PIN("  motain2_pin: ", this->mota_in2_pin_);
-    LOG_PIN("  motbenca_pin: ", this->motb_enca_pin_);
-    LOG_PIN("  motbencb_pin: ", this->motb_encb_pin_);
-    LOG_PIN("  motbpwm_pin: ", this->motb_pwm_pin_);
-    LOG_PIN("  motbin1_pin: ", this->motb_in1_pin_);
-    LOG_PIN("  motbin2_pin: ", this->motb_in2_pin_);
     ESP_LOGCONFIG(TAG, "  boardId: %d", this->boardId);
+}
+
+void WindowControllerHub::all_children_dump_config() {
+    // traditional hub architecture has each component type (sensor, fan, etc) is a new child
+    // I'm using these children to reference each motor
+    for (auto *child : this->children_) {
+        child->child_dump_config();
+    }
 }
 
 // float ExampleComponent::get_setup_priority() const {
