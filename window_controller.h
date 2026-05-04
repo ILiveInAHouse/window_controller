@@ -165,11 +165,11 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       // Tell the child who its parent is
       this->max_torque_->set_parent(this);
 
-      if (whichMotorIsValid(this->target_position_->whichMotor)) {
-        if (this->target_position_->whichMotor == MOTOR_A) {
+      if (whichMotorIsValid(this->max_torque_->whichMotor)) {
+        if (this->max_torque_->whichMotor == MOTOR_A) {
           this->motuiA.max_torque = this->max_torque_;
         }
-        if (this->target_position_->whichMotor == MOTOR_B) {
+        if (this->max_torque_->whichMotor == MOTOR_B) {
           this->motuiB.max_torque = this->max_torque_;
         }
       }
@@ -187,10 +187,10 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       this->window_number_->set_parent(this);
 
       if (whichMotorIsValid(this->window_number_->whichMotor)) {
-        if (this->target_position_->whichMotor == MOTOR_A) {
+        if (this->window_number_->whichMotor == MOTOR_A) {
           this->motuiA.window_number = this->window_number_;
         }
-        if (this->target_position_->whichMotor == MOTOR_B) {
+        if (this->window_number_->whichMotor == MOTOR_B) {
           this->motuiB.window_number = this->window_number_;
         }
       }
@@ -208,10 +208,10 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       this->faults_->set_parent(this);
 
       if (whichMotorIsValid(this->faults_->whichMotor)) {
-        if (this->target_position_->whichMotor == MOTOR_A) {
+        if (this->faults_->whichMotor == MOTOR_A) {
           this->motuiA.faults = this->faults_;
         }
-        if (this->target_position_->whichMotor == MOTOR_B) {
+        if (this->faults_->whichMotor == MOTOR_B) {
           this->motuiB.faults = this->faults_;
         }
       }

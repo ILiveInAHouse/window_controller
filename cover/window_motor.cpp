@@ -59,7 +59,7 @@ void WindowMotorClass::child_publish_info() {
 void WindowMotorClass::child_update() {
    // Called from parent hub.
    // Could do some synch work here.
-   ESP_LOGI(TAG, "motor=%c child_update setup_called=%d winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->setup_called, this->windowNumber);
+   ESP_LOGI(TAG, "Ymotor=%c child_update setup_called=%d winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->setup_called, this->windowNumber);
 }
 
 } // namespace window_controller

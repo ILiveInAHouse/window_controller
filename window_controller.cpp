@@ -278,10 +278,10 @@ void WindowControllerHub::setup() {
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
         if (child->getWhichMotor() == MOTOR_A) {
-            //child->child_setup(&this->motuiA);
+            child->child_setup(&this->motuiA);
         }
         if (child->getWhichMotor() == MOTOR_B) {
-            //child->child_setup(&this->motuiB);
+            child->child_setup(&this->motuiB);
         }
     }
 
@@ -321,7 +321,7 @@ void WindowControllerHub::all_children_update() {
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
-        //child->child_update();
+        child->child_update();
     }
 }
 
@@ -329,7 +329,7 @@ void WindowControllerHub::all_children_publish_info() {
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
-        //child->child_publish_info();
+        child->child_publish_info();
     }
 }
 
