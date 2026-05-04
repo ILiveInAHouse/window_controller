@@ -20,7 +20,6 @@ class WindowControllerClient : public Parented<WindowControllerHub> {
   virtual void child_publish_info() = 0;
   virtual void child_update() = 0;
   virtual WhichMotorEnum getWhichMotor() = 0;
-  virtual void linkTargetPosition(WCNumber *tpos) = 0;
 
  protected:
   friend WindowControllerHub;

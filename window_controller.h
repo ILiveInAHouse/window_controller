@@ -154,12 +154,6 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
         }
       }
 
-      for (auto *child : this->children_) {
-        if (child->getWhichMotor() == n->whichMotor) {
-          child->linkTargetPosition(this->target_position_);
-        }
-      }
-
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method
       // this->percentage_number_->add_on_state_callback([this](float value) {

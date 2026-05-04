@@ -25,7 +25,6 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent 
       void child_publish_info();
       void child_update();
       WhichMotorEnum getWhichMotor();
-      void linkTargetPosition(WCNumber *tpos);
       WCMotorUI *ui;
       uint16_t statusMask;
 

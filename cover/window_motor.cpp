@@ -47,10 +47,6 @@ WhichMotorEnum WindowMotorClass::getWhichMotor() {
    return this->whichMotor;
 }
 
-void WindowMotorClass::linkTargetPosition(WCNumber *tpos) {
-   this->targetPosition = tpos;
-}
-
 void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->boardid = boardid;
    this->ui = ui;
