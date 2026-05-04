@@ -9,6 +9,7 @@
 #include "wc_number.h"
 #include "wc_whichmotor.h"
 #include "wc_sensor.h"
+#include "wc_motorui.h"
 
 // window motor faults
 #define WINMOTFAULT_PIN_NULL 0x0
@@ -63,7 +64,6 @@ class WindowMotor {
     bool getBusVoltage(float *bus_voltage_v);
     bool getCurrent(float *current_a);
     bool getShuntVoltage(float *shunt_voltage_mv);
-    uint8_t getWindowNumber();
     uint32_t getFaults();
     bool getIsMotorA();
 
@@ -134,6 +134,8 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
 
     WindowMotor motA;
     WindowMotor motB;
+    WCMotorUI motuiA;
+    WCMotorUI motuiB;
   
     void register_child(WindowControllerClient *obj);
 
@@ -142,6 +144,15 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       this->target_position_ = n;
       // Tell the child who its parent is
       this->target_position_->set_parent(this);
+
+      if (whichMotorIsValid(this->target_position_->whichMotor)) {
+        if (this->target_position_->whichMotor == MOTOR_A) {
+          this->motuiA.target_position = this->target_position_;
+        }
+        if (this->target_position_->whichMotor == MOTOR_B) {
+          this->motuiB.target_position = this->target_position_;
+        }
+      }
 
       for (auto *child : this->children_) {
         if (child->getWhichMotor() == n->whichMotor) {
@@ -160,6 +171,15 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       // Tell the child who its parent is
       this->max_torque_->set_parent(this);
 
+      if (whichMotorIsValid(this->target_position_->whichMotor)) {
+        if (this->target_position_->whichMotor == MOTOR_A) {
+          this->motuiA.max_torque = this->max_torque_;
+        }
+        if (this->target_position_->whichMotor == MOTOR_B) {
+          this->motuiB.max_torque = this->max_torque_;
+        }
+      }
+
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method
       // this->percentage_number_->add_on_state_callback([this](float value) {
@@ -172,6 +192,15 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       // Tell the child who its parent is
       this->window_number_->set_parent(this);
 
+      if (whichMotorIsValid(this->window_number_->whichMotor)) {
+        if (this->target_position_->whichMotor == MOTOR_A) {
+          this->motuiA.window_number = this->window_number_;
+        }
+        if (this->target_position_->whichMotor == MOTOR_B) {
+          this->motuiB.window_number = this->window_number_;
+        }
+      }
+
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method
       // this->percentage_number_->add_on_state_callback([this](float value) {
@@ -183,6 +212,15 @@ class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
       this->faults_ = s;
       // Tell the child who its parent is
       this->faults_->set_parent(this);
+
+      if (whichMotorIsValid(this->faults_->whichMotor)) {
+        if (this->target_position_->whichMotor == MOTOR_A) {
+          this->motuiA.faults = this->faults_;
+        }
+        if (this->target_position_->whichMotor == MOTOR_B) {
+          this->motuiB.faults = this->faults_;
+        }
+      }
 
       // Instead of a parent pointer, you can register a callback that
       //   runs the parent's method

@@ -15,10 +15,10 @@ public:
   // Store a pointer to the parent hub
   void set_parent(WindowControllerHub *parent) { this->parent_ = parent; }
   void set_which_motor(WhichMotorEnum which) {this->whichMotor = which; }
+  WhichMotorEnum whichMotor{MOTOR_NONE};
 protected:
   WindowControllerHub *parent_;
   // void control(float value) override;
-  WhichMotorEnum whichMotor{MOTOR_NONE};
 };
 
 } // namespace

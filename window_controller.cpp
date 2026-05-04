@@ -185,37 +185,8 @@ bool WindowMotor::powerdownINA219() {
   return FUNC_OK;
 }
 
-void WindowMotor::calcWinNumAndStsMsk() {
-    if (this->boardId > MAX_BOARD_ID) {
-        return;
-    }
-    // Calculate Window number and status mask
-    //                           statusMask 0x0001 reserved for all-stop
-    // boardId 0 = windows 1&2   statusMask 0x0002 & 0x0004
-    // boardId 1 = windows 5&6   statusMask 0x0008 & 0x0010
-    // boardId 2 = windows 9&10  statusMask 0x0020 & 0x0040
-    // boardId 3 = windows 11&12 statusMask 0x0080 & 0x0100
-    // boardId 4 = windows 13&14 statusMask 0x0200 & 0x0400
-    this->windowNumber = 1;
-    if (!this->isMotorA) {
-        this->windowNumber++;
-    }
-    if (this->boardId > 0) {
-        this->windowNumber += 4;
-    }
-    if (this->boardId > 1) {
-        this->windowNumber += 4;
-        this->windowNumber += (2*(this->boardId-2));
-    }
-    this->statusMask = 2 << (((this->boardId * 2) + ((this->isMotorA) ? 0 : 1)));
-}
-
 void WindowMotor::setAllMotorStatus(uint16_t newsts) {
     this->allMotorStatus = newsts;
-}
-
-uint8_t WindowMotor::getWindowNumber() {
-    return this->windowNumber;
 }
 
 bool WindowMotor::getIsMotorA() {
@@ -239,17 +210,17 @@ bool WindowMotor::setup(uint8_t boardId, bool isMotorA, InternalGPIOPin *enca_pi
     }
     this->isMotorA = isMotorA;
     this->boardId = boardId;
-    this->calcWinNumAndStsMsk();
+    //this->calcWinNumAndStsMsk(); // moved to window_motor.cpp
     return FUNC_OK;
 }
 
 void WindowMotor::update() {
-    this->calcWinNumAndStsMsk();
+    //this->calcWinNumAndStsMsk(); // moved to window_motor.cpp
     float bus_voltage_v;
     this->getBusVoltage(&bus_voltage_v);
     float current_a;
     this->getCurrent(&current_a);
-    ESP_LOGI(TAG, " %c win#=%d stsMsk=%04x bus_voltage=%2.2fV current:%2.2fA", 
+    ESP_LOGI(TAG, " %c Xwin#=%d stsMsk=%04x bus_voltage=%2.2fV current:%2.2fA", 
             (this->isMotorA) ? 'A' : 'B', this->windowNumber, this->statusMask, 
             bus_voltage_v, current_a);
 }
@@ -258,6 +229,8 @@ WindowControllerHub::WindowControllerHub() {
     // Constructor
     // Initialize class fields and configurations
     this->shutdownImminent = false;
+    this->motuiA.whichMotor = MOTOR_A;
+    this->motuiB.whichMotor = MOTOR_B;
 }
 
 void WindowControllerHub::setup() {
@@ -283,6 +256,8 @@ void WindowControllerHub::setup() {
         this->mark_failed();
         return;
     }
+    this->motuiA.boardId = this->boardId;
+    this->motuiB.boardId = this->boardId;
 
     // setup MotorA
     if (FUNC_FAIL == this->motA.setup(this->boardId, true, this->mota_enca_pin_, 
@@ -298,13 +273,19 @@ void WindowControllerHub::setup() {
         this->mark_failed();
         return;
     }
-    delay(1);
 
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
-        child->child_setup();
+        if (child->getWhichMotor() == MOTOR_A) {
+            child->child_setup(&this->motuiA);
+        }
+        if (child->getWhichMotor() == MOTOR_B) {
+            child->child_setup(&this->motuiB);
+        }
     }
+
+    delay(1);
 }
 
 //void ExampleComponent::loop() {

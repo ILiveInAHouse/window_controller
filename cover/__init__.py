@@ -21,6 +21,7 @@ WindowMotorClass = window_controller_ns.class_(
 
 WhichMotor = window_controller_ns.enum("WhichMotorEnum")
 MOTOR_ENUMS = {
+    "MOTOR_NUM" : WhichMotor.MOTOR_NUM,
     "MOTOR_NONE": WhichMotor.MOTOR_NONE,
     "MOTOR_A": WhichMotor.MOTOR_A,
     "MOTOR_B": WhichMotor.MOTOR_B,
