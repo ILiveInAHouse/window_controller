@@ -21,7 +21,8 @@ class WindowControllerClient : public Parented<WindowControllerHub> {
   virtual void child_update() = 0;
   virtual void child_dump_config() = 0;
   virtual WhichMotorEnum getWhichMotor() = 0;
-
+  virtual void child_on_safe_shutdown() = 0;
+  
  protected:
   friend WindowControllerHub;
 //   virtual std::string describe() = 0;

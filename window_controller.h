@@ -2,7 +2,6 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/gpio.h"
-#include "esphome/components/i2c/i2c.h"
 #include "window_controller_child.h"
 #include "esphome/components/number/number.h"
 #include "esphome/components/sensor/sensor.h"
@@ -18,6 +17,8 @@
 #define WINCTRLFAULT_BOARDID_PIN_NULL 0x0
 
 #define MAX_BOARD_ID 4
+#define FUNC_OK 1
+#define FUNC_FAIL 0
 
 // Namespace definition
 namespace esphome::window_controller {
@@ -41,28 +42,12 @@ class WindowMotor {
     // void dump_config() override;
     // void update() override;
 
-    bool calcINA219config();
-    bool powerdownINA219();
-    void calcWinNumAndStsMsk();
-
-    // Add any setters of configuration variables
-    // void set_encA_pin(InternalGPIOPin *pin) {encA_pin_ = pin;}
-    // void set_encB_pin(InternalGPIOPin *pin) {encB_pin_ = pin;}
-    // void set_pwm_pin(InternalGPIOPin *pin) {pwm_pin_ = pin;}
-    // void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
-    // void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
-    // void set_scl_pin(InternalGPIOPin *pin) {scl_pin_ = pin;}
-    // void set_sda_pin(InternalGPIOPin *pin) {sda_pin_ = pin;}
     void setAllMotorStatus(uint16_t newsts);
  
     // getters
-    bool getBusVoltage(float *bus_voltage_v);
-    bool getCurrent(float *current_a);
-    bool getShuntVoltage(float *shunt_voltage_mv);
     uint32_t getFaults();
     bool getIsMotorA();
 
-    i2c::I2CDevice ina219;  // current sensor
     uint8_t boardId;
     float targetPosition;
 
@@ -79,14 +64,9 @@ class WindowMotor {
     float maxTorqueSeen;
     float current;
     float rpm;
-    // ina219 vars
-    float shunt_resistance_ohm_;
-    float max_current_a_;
-    float max_voltage_v_;
-    uint32_t calibration_lsb_;
 };
 
-class WindowControllerHub : public PollingComponent, public i2c::I2CDevice {
+class WindowControllerHub : public PollingComponent {
   public:
     // Constructor
     WindowControllerHub();
