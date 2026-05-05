@@ -15,45 +15,11 @@ void WCNumber::control(float value) {
     }
 }
 
-WindowMotor::WindowMotor() {
-    this->faults = 0;
-    this->boardId = 0xff;
-    this->windowNumber = 0;
-    this->statusMask = 0x0;
-    this->targetPosition = 0;
-}
-
-void WindowMotor::setAllMotorStatus(uint16_t newsts) {
-    this->allMotorStatus = newsts;
-}
-
-bool WindowMotor::getIsMotorA() {
-    return this->isMotorA;
-}
-
-uint32_t WindowMotor::getFaults() {
-    return this->faults;
-}
-
-bool WindowMotor::setup(uint8_t boardId, bool isMotorA) {
-    this->isMotorA = isMotorA;
-    this->boardId = boardId;
-    //this->calcWinNumAndStsMsk(); // moved to window_motor.cpp
-    return FUNC_OK;
-}
-
-void WindowMotor::update() {
-    //this->calcWinNumAndStsMsk(); // moved to window_motor.cpp
-    ESP_LOGI(TAG, " %c Xwin#=%d stsMsk=%04x", 
-            (this->isMotorA) ? 'A' : 'B', this->windowNumber, this->statusMask);
-}
 
 WindowControllerHub::WindowControllerHub() {
     // Constructor
     // Initialize class fields and configurations
     this->shutdownImminent = false;
-    this->motuiA.whichMotor = MOTOR_A;
-    this->motuiB.whichMotor = MOTOR_B;
 }
 
 void WindowControllerHub::setup() {
@@ -76,19 +42,6 @@ void WindowControllerHub::setup() {
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
     if (boardId > MAX_BOARD_ID) {
-        this->mark_failed();
-        return;
-    }
-    this->motuiA.boardId = this->boardId;
-    this->motuiB.boardId = this->boardId;
-
-    // setup MotorA
-    if (FUNC_FAIL == this->motA.setup(this->boardId, true)) {
-        this->mark_failed();
-        return;
-    }
-    // setup MotorB
-    if (FUNC_FAIL == this->motB.setup(this->boardId, false)) {
         this->mark_failed();
         return;
     }
@@ -124,14 +77,6 @@ void WindowControllerHub::update() {
                     (this->boardid0_pin_->digital_read() << 0);
     ESP_LOGI(TAG, " boardid: %d", this->boardId);
 
-    // update Motor A
-    this->motA.boardId = this->boardId;
-    this->motA.update();
-
-    // update Motor B
-    this->motB.boardId = this->boardId;
-    this->motB.update();
-
     this->all_children_publish_info();
     this->all_children_update();
 }
@@ -152,16 +97,7 @@ void WindowControllerHub::all_children_publish_info() {
     }
 }
 
-void WindowControllerHub::setAllMotorStatus(uint16_t newsts) {
-    this->motA.setAllMotorStatus(newsts);
-    this->motB.setAllMotorStatus(newsts);
-}
-
 uint8_t WindowControllerHub::getBoardId() const { return this->boardId; }
-
-uint32_t WindowControllerHub::getFaults() {
-    return this->motA.getFaults();
-}
 
 // Called once after booting and then each time a new client connects
 //   to monitor logs

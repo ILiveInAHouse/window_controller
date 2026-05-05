@@ -14,12 +14,21 @@ namespace esphome::window_controller {
 // Also put config info from the hub for the WindowMotorClasses to use.
 class WCMotorUI {
 public:
-   WCNumber *target_position;
-   WCNumber *max_torque;
-   WCSensor *window_number;
-   WCSensor *faults;
+   WCNumber *target_position_Number;
+   WCNumber *max_torque_Number;
+   WCSensor *window_number_Sensor;
+   WCSensor *faults_Sensor;
    WhichMotorEnum whichMotor{MOTOR_NONE};
    uint8_t boardId;
+   uint16_t status; // statusMask bit is set if this window has work to do
+   uint16_t statusMask;
+    uint16_t allMotorStatus;  // input from Hass
+    uint32_t faults;
+    float numRotationsToFullOpen;
+    float currentRotationIndex;
+    float maxTorqueSeen;
+    float current;
+    float rpm;
 
 protected:
 };

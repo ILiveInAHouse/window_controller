@@ -196,7 +196,7 @@ void WindowMotorClass::calcWinNumAndStsMsk() {
         windowNumber += 4;
         windowNumber += (2*(this->ui->boardId-2));
     }
-    this->ui->window_number->publish_state(windowNumber);
+    this->ui->window_number_Sensor->publish_state(windowNumber);
     this->windowNumber = windowNumber;
     this->statusMask = 2 << (((this->ui->boardId * 2) + ((this->whichMotor == MOTOR_A) ? 0 : 1)));
 }

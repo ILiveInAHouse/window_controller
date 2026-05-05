@@ -27,45 +27,6 @@ namespace esphome::window_controller {
 class WindowControllerClient;
 class WindowControllerHub;
 
-class WindowMotor {
-
-  public:
-    // Constructor
-    WindowMotor();
-    
-    bool setup(uint8_t boardId, bool isMotorA);
-
-    void update();
-
-    // Standard component functions to override
-    // void setup() override;
-    // void dump_config() override;
-    // void update() override;
-
-    void setAllMotorStatus(uint16_t newsts);
- 
-    // getters
-    uint32_t getFaults();
-    bool getIsMotorA();
-
-    uint8_t boardId;
-    float targetPosition;
-
-  protected:
-    // Internal fields definition
-    uint32_t faults;
-    uint8_t windowNumber;
-    uint16_t status;          // statusMask bit is set if this window has work to do
-    uint16_t statusMask;
-    uint16_t allMotorStatus;  // input from Hass
-    bool isMotorA;
-    float numRotationsToFullOpen;
-    float currentRotationIndex;
-    float maxTorqueSeen;
-    float current;
-    float rpm;
-};
-
 class WindowControllerHub : public PollingComponent {
   public:
     // Constructor
@@ -85,13 +46,9 @@ class WindowControllerHub : public PollingComponent {
     void set_boardid1_pin(InternalGPIOPin *pin) {boardid1_pin_ = pin;}
     void set_boardid2_pin(InternalGPIOPin *pin) {boardid2_pin_ = pin;}
 
-    void setAllMotorStatus(uint16_t newsts);
     // getters
     uint8_t getBoardId() const;
-    uint32_t getFaults();
 
-    WindowMotor motA;
-    WindowMotor motB;
     WCMotorUI motuiA;
     WCMotorUI motuiB;
   
@@ -99,16 +56,16 @@ class WindowControllerHub : public PollingComponent {
 
     // This is called by the Python code to link the UI slider to this class
     void set_target_position(WCNumber *n) {
-      this->target_position_ = n;
+      this->target_position_Number = n;
       // Tell the child who its parent is
-      this->target_position_->set_parent(this);
+      this->target_position_Number->set_parent(this);
 
-      if (whichMotorIsValid(this->target_position_->whichMotor)) {
-        if (this->target_position_->whichMotor == MOTOR_A) {
-          this->motuiA.target_position = this->target_position_;
+      if (whichMotorIsValid(this->target_position_Number->whichMotor)) {
+        if (this->target_position_Number->whichMotor == MOTOR_A) {
+          this->motuiA.target_position_Number = this->target_position_Number;
         }
-        if (this->target_position_->whichMotor == MOTOR_B) {
-          this->motuiB.target_position = this->target_position_;
+        if (this->target_position_Number->whichMotor == MOTOR_B) {
+          this->motuiB.target_position_Number = this->target_position_Number;
         }
       }
 
@@ -119,16 +76,16 @@ class WindowControllerHub : public PollingComponent {
       // });
     }
     void set_max_torque(WCNumber *n) {
-      this->max_torque_ = n;
+      this->max_torque_Number = n;
       // Tell the child who its parent is
-      this->max_torque_->set_parent(this);
+      this->max_torque_Number->set_parent(this);
 
-      if (whichMotorIsValid(this->max_torque_->whichMotor)) {
-        if (this->max_torque_->whichMotor == MOTOR_A) {
-          this->motuiA.max_torque = this->max_torque_;
+      if (whichMotorIsValid(this->max_torque_Number->whichMotor)) {
+        if (this->max_torque_Number->whichMotor == MOTOR_A) {
+          this->motuiA.max_torque_Number = this->max_torque_Number;
         }
-        if (this->max_torque_->whichMotor == MOTOR_B) {
-          this->motuiB.max_torque = this->max_torque_;
+        if (this->max_torque_Number->whichMotor == MOTOR_B) {
+          this->motuiB.max_torque_Number = this->max_torque_Number;
         }
       }
 
@@ -140,16 +97,16 @@ class WindowControllerHub : public PollingComponent {
     }
 
     void set_window_number(WCSensor *s) {
-      this->window_number_ = s;
+      this->window_number_Sensor = s;
       // Tell the child who its parent is
-      this->window_number_->set_parent(this);
+      this->window_number_Sensor->set_parent(this);
 
-      if (whichMotorIsValid(this->window_number_->whichMotor)) {
-        if (this->window_number_->whichMotor == MOTOR_A) {
-          this->motuiA.window_number = this->window_number_;
+      if (whichMotorIsValid(this->window_number_Sensor->whichMotor)) {
+        if (this->window_number_Sensor->whichMotor == MOTOR_A) {
+          this->motuiA.window_number_Sensor = this->window_number_Sensor;
         }
-        if (this->window_number_->whichMotor == MOTOR_B) {
-          this->motuiB.window_number = this->window_number_;
+        if (this->window_number_Sensor->whichMotor == MOTOR_B) {
+          this->motuiB.window_number_Sensor = this->window_number_Sensor;
         }
       }
 
@@ -161,16 +118,16 @@ class WindowControllerHub : public PollingComponent {
     }
 
     void set_faults(WCSensor *s) {
-      this->faults_ = s;
+      this->faults_Sensor = s;
       // Tell the child who its parent is
-      this->faults_->set_parent(this);
+      this->faults_Sensor->set_parent(this);
 
-      if (whichMotorIsValid(this->faults_->whichMotor)) {
-        if (this->faults_->whichMotor == MOTOR_A) {
-          this->motuiA.faults = this->faults_;
+      if (whichMotorIsValid(this->faults_Sensor->whichMotor)) {
+        if (this->faults_Sensor->whichMotor == MOTOR_A) {
+          this->motuiA.faults_Sensor = this->faults_Sensor;
         }
-        if (this->faults_->whichMotor == MOTOR_B) {
-          this->motuiB.faults = this->faults_;
+        if (this->faults_Sensor->whichMotor == MOTOR_B) {
+          this->motuiB.faults_Sensor = this->faults_Sensor;
         }
       }
 
@@ -196,12 +153,12 @@ class WindowControllerHub : public PollingComponent {
     bool shutdownImminent{false};
 
     // Controls
-    WCNumber *target_position_{ nullptr };
-    WCNumber *max_torque_{ nullptr };
+    WCNumber *target_position_Number{ nullptr };
+    WCNumber *max_torque_Number{ nullptr };
 
     // Status
-    WCSensor *window_number_{nullptr};
-    WCSensor *faults_{nullptr};
+    WCSensor *window_number_Sensor{nullptr};
+    WCSensor *faults_Sensor{nullptr};
 };
 
 }  // namespace esphome::window_controller
