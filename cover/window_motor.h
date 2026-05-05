@@ -25,18 +25,14 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void dump_config() override;
 
       void setFault(uint32_t fault_bit);
+      void setMotorStatus(uint16_t sts);
       void calcWinNumAndStsMsk();
-      void setWhichMotor(WhichMotorEnum whichMotor_) {
-         this->whichMotor = whichMotor_;
-      }
-      WhichMotorEnum getWhichMotor() {
-         return this->whichMotor;
-      }
+      void setWhichMotor(WhichMotorEnum whichMotor_) {this->whichMotor = whichMotor_;}
+      WhichMotorEnum getWhichMotor() {return this->whichMotor;}
       void child_setup(WCMotorUI *ui);
       void child_publish_info();
       void child_sync_update();
       WCMotorUI *ui;
-      uint16_t statusMask;
       void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
       void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
       void set_pwm_pin(InternalGPIOPin *pin) {pwm_pin_ = pin;}
@@ -55,6 +51,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       WCNumber *targetPosition;
       uint8_t windowNumber;
       WhichMotorEnum whichMotor;
+      uint16_t statusMask;
       InternalGPIOPin *enca_pin_{nullptr};
       InternalGPIOPin *encb_pin_{nullptr};
       InternalGPIOPin *pwm_pin_{nullptr};

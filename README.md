@@ -39,6 +39,9 @@ sensor:
     faults:
       device_id: motor_A_device
       name: "Faults"
+    motor_status:
+      device_id: motor_A_device
+      name: "Motor Status"
   - platform: window_controller
     window_controller_id: window_controller_hub_id
     which_motor: MOTOR_B
@@ -48,6 +51,9 @@ sensor:
     faults:
       device_id: motor_B_device
       name: "Faults"
+    motor_status:
+      device_id: motor_B_device
+      name: "Motor Status"
 
 cover:
   - platform: window_controller

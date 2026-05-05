@@ -15,22 +15,18 @@ public:
    WCNumber *max_torque_Number;
    WCSensor *window_number_Sensor;
    WCSensor *faults_Sensor;
+   WCSensor *motor_status_Sensor;
    uint8_t boardId;
-   uint16_t status; // statusMask bit is set if this window has work to do
-   uint16_t statusMask;
    uint16_t allMotorStatus;  // input from Hass
-   uint32_t faults;
    float numRotationsToFullOpen;
    float currentRotationIndex;
    float maxTorqueSeen;
    float current;
    float rpm;
-   WhichMotorEnum getWhichMotor() {
-      return this->whichMotor;
-   }
-   void setWhichMotor(WhichMotorEnum w) {
-      this->whichMotor = w;
-   }
+   WhichMotorEnum getWhichMotor() {return this->whichMotor;}
+   void setWhichMotor(WhichMotorEnum w) {this->whichMotor = w;}
+   uint32_t faults;
+   uint16_t motor_status; // statusMask bit is set if this window has work to do
 
 protected:
    WhichMotorEnum whichMotor{MOTOR_NONE};

@@ -158,6 +158,15 @@ void WindowMotorClass::setFault(uint32_t fault_bit) {
    this->ui->faults_Sensor->publish_state(this->faults);
 }
 
+void WindowMotorClass::setMotorStatus(uint16_t sts) {
+   if (sts) {
+      this->ui->motor_status = sts;
+   } else {
+      this->ui->motor_status = 0;
+   }
+   this->ui->motor_status_Sensor->publish_state(this->ui->motor_status);
+}
+
 void WindowMotorClass::setup() {
    // this->ui may not be available when this runs
 }
@@ -200,6 +209,7 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    }
    this->ui = ui;
    this->setFault(0x0);
+   this->setMotorStatus(0x0);
    if (FUNC_FAIL == this->calcINA219config()) {
       this->setFault(MOTFAULT_INA219_INIT);
       this->mark_failed();
@@ -231,7 +241,7 @@ void WindowMotorClass::child_sync_update() {
    this->getBusVoltage(&bus_voltage_v);
    float current_a;
    this->getCurrent(&current_a);
-   ESP_LOGI(TAG, " %c win#=%d stsMsk=0x%08x bus_voltage=%2.2fV current=%2.2fA",
+   ESP_LOGI(TAG, " %c win#=%d stsMsk=0x%04x bus_voltage=%2.2fV current=%2.2fA",
          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
          bus_voltage_v, current_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);

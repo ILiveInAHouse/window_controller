@@ -94,7 +94,6 @@ class WindowControllerHub : public PollingComponent {
     }
 
     void set_window_number(WCSensor *s) {
-      // this->window_number_Sensor = s;
       WCSensor *s_ = s;
       // Tell the child who its parent is
       s_->set_parent(this);
@@ -126,6 +125,27 @@ class WindowControllerHub : public PollingComponent {
         }
         if (s_->whichMotor == MOTOR_B) {
           this->motuiB.faults_Sensor = s_;
+        }
+      }
+
+      // Instead of a parent pointer, you can register a callback that
+      //   runs the parent's method
+      // this->percentage_number_->add_on_state_callback([this](float value) {
+      //     this->on_slider_changed(value);
+      // });
+    }
+
+    void set_motor_status(WCSensor *s) {
+      WCSensor *s_ = s;
+      // Tell the child who its parent is
+      s_->set_parent(this);
+
+      if (whichMotorIsValid(s_->whichMotor)) {
+        if (s_->whichMotor == MOTOR_A) {
+          this->motuiA.motor_status_Sensor = s_;
+        }
+        if (s_->whichMotor == MOTOR_B) {
+          this->motuiB.motor_status_Sensor = s_;
         }
       }
 
