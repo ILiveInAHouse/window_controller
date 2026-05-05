@@ -18,11 +18,9 @@ class WindowControllerClient : public Parented<WindowControllerHub> {
 //   virtual void on_bedjet_state(bool is_ready) = 0;
   virtual void child_setup(WCMotorUI *ui) = 0;
   virtual void child_publish_info() = 0;
-  virtual void child_update() = 0;
-  virtual void child_dump_config() = 0;
-  virtual WhichMotorEnum getWhichMotor() = 0;
-  virtual void child_on_safe_shutdown() = 0;
-  
+  virtual void child_sync_update() = 0;
+  WhichMotorEnum whichMotor;
+
  protected:
   friend WindowControllerHub;
 //   virtual std::string describe() = 0;

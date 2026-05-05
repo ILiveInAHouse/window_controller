@@ -151,32 +151,24 @@ bool WindowMotorClass::powerdownINA219() {
 WindowMotorClass::WindowMotorClass() {
     // Constructor
     // Initialize class fields and configurations
-    this->shutdownImminent = false;
+}
+
+void WindowMotorClass::setFault(uint32_t fault_bit) {
+   this->faults |= fault_bit;
+   this->ui->faults_Sensor->publish_state(this->faults);
 }
 
 void WindowMotorClass::setup() {
-   this->setup_called = true;
-   if (FUNC_FAIL == this->calcINA219config()) {
-      this->mark_failed();
-      return;
-   }
+   // this->ui may not be available when this runs
 }
 
 void WindowMotorClass::update() {
-   // Called at WindowMotorClass polling rate
-   float bus_voltage_v;
-   this->getBusVoltage(&bus_voltage_v);
-   float current_a;
-   this->getCurrent(&current_a);
-   ESP_LOGI(TAG, " %c Xwin#=%d stsMsk=%04x bus_voltage=%2.2fV current:%2.2fA", 
-         (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
-         bus_voltage_v, current_a);
-   ESP_LOGI(TAG, "motor=%c update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
 }
 
 void WindowMotorClass::calcWinNumAndStsMsk() {
     if (this->ui->boardId > MAX_BOARD_ID) {
-        return;
+      this->mark_failed();
+      return;
     }
     // Calculate Window number and status mask
     //                           statusMask 0x0001 reserved for all-stop
@@ -201,13 +193,14 @@ void WindowMotorClass::calcWinNumAndStsMsk() {
     this->statusMask = 2 << (((this->ui->boardId * 2) + ((this->whichMotor == MOTOR_A) ? 0 : 1)));
 }
 
-WhichMotorEnum WindowMotorClass::getWhichMotor() {
-   return this->whichMotor;
-}
-
 void WindowMotorClass::child_setup(WCMotorUI *ui) {
-   this->boardid = boardid;
    this->ui = ui;
+   this->setFault(0x0);
+   if (FUNC_FAIL == this->calcINA219config()) {
+      this->setFault(MOTFAULT_INA219_INIT);
+      this->mark_failed();
+      return;
+   }
    this->calcWinNumAndStsMsk();
 }
 
@@ -216,7 +209,7 @@ void WindowMotorClass::child_publish_info() {
 
 // Called once after booting and then each time a new client connects
 //   to monitor logs
-void WindowMotorClass::child_dump_config() {
+void WindowMotorClass::dump_config() {
     LOG_I2C_DEVICE(this);
     LOG_PIN("  enca_pin: ", this->enca_pin_);
     LOG_PIN("  encb_pin: ", this->encb_pin_);
@@ -226,13 +219,23 @@ void WindowMotorClass::child_dump_config() {
 
 }
 
-void WindowMotorClass::child_update() {
+void WindowMotorClass::child_sync_update() {
    // Called from parent hub.
    // Could do some synch work here.
-   ESP_LOGI(TAG, "Ymotor=%c child_update setup_called=%d winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->setup_called, this->windowNumber);
+   // Called at WindowMotorClass polling rate
+   float bus_voltage_v;
+   this->getBusVoltage(&bus_voltage_v);
+   float current_a;
+   this->getCurrent(&current_a);
+   ESP_LOGI(TAG, " %c Ywin#=%d stsMsk=0x%08x bus_voltage=%2.2fV current=%2.2fA winnum_ptr=%p winnum_which=%d", 
+         (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
+         bus_voltage_v, current_a, this->ui->window_number_Sensor, this->ui->window_number_Sensor->whichMotor);
+   // ESP_LOGI(TAG, "motor=%c update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
+   this->ui->window_number_Sensor->publish_state(this->windowNumber);
+   ESP_LOGI(TAG, "Ymotor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
 }
 
-void WindowMotorClass::child_on_safe_shutdown() {
+void WindowMotorClass::on_safe_shutdown() {
   // Optional: Critical cleanup operations for safe shutdowns only
   // This is called first, before any other shutdown procedures
   // ESP_LOGI(TAG, "Safe shutdown initiated");

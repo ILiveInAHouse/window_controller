@@ -7,9 +7,6 @@
 // Namespace definition
 namespace esphome::window_controller {
 
-// Forward declare WindowControllerHub
-//class WindowControllerHub;
-
 // Store pointers to all the UI controls and sensors that the WindowMotorClass uses.
 // Also put config info from the hub for the WindowMotorClasses to use.
 class WCMotorUI {
@@ -22,13 +19,13 @@ public:
    uint8_t boardId;
    uint16_t status; // statusMask bit is set if this window has work to do
    uint16_t statusMask;
-    uint16_t allMotorStatus;  // input from Hass
-    uint32_t faults;
-    float numRotationsToFullOpen;
-    float currentRotationIndex;
-    float maxTorqueSeen;
-    float current;
-    float rpm;
+   uint16_t allMotorStatus;  // input from Hass
+   uint32_t faults;
+   float numRotationsToFullOpen;
+   float currentRotationIndex;
+   float maxTorqueSeen;
+   float current;
+   float rpm;
 
 protected:
 };

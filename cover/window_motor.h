@@ -12,6 +12,8 @@
 namespace esphome {
 namespace window_controller {
 
+#define MOTFAULT_INA219_INIT 0x1
+
 class WindowMotorClass : public WindowControllerClient, public PollingComponent, public i2c::I2CDevice {
    public:
       // Constructor
@@ -19,6 +21,10 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void setup() override;
       void update() override;
       void on_shutdown() override;
+      void on_safe_shutdown() override;
+      void dump_config() override;
+
+      void setFault(uint32_t fault_bit);
       void calcWinNumAndStsMsk();
       void set_whichMotor(WhichMotorEnum whichMotor_) {
          this->whichMotor = whichMotor_;
@@ -26,10 +32,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       WhichMotorEnum whichMotor;
       void child_setup(WCMotorUI *ui);
       void child_publish_info();
-      void child_update();
-      void child_dump_config();
-      void child_on_safe_shutdown();
-      WhichMotorEnum getWhichMotor();
+      void child_sync_update();
       WCMotorUI *ui;
       uint16_t statusMask;
       void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
@@ -38,17 +41,15 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
       void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
       i2c::I2CDevice ina219;  // current sensor
-    bool calcINA219config();
-    bool powerdownINA219();
-    bool getBusVoltage(float *bus_voltage_v);
-    bool getCurrent(float *current_a);
-    bool getShuntVoltage(float *shunt_voltage_mv);
+      bool calcINA219config();
+      bool powerdownINA219();
+      bool getBusVoltage(float *bus_voltage_v);
+      bool getCurrent(float *current_a);
+      bool getShuntVoltage(float *shunt_voltage_mv);
 
 
    protected:
-      bool setup_called = false;
-      uint32_t faults;
-      uint8_t boardid;
+      uint32_t faults{0};
       WCNumber *targetPosition;
       uint8_t windowNumber;
       InternalGPIOPin *enca_pin_{nullptr};
@@ -56,12 +57,14 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       InternalGPIOPin *pwm_pin_{nullptr};
       InternalGPIOPin *in1_pin_{nullptr};
       InternalGPIOPin *in2_pin_{nullptr};
+
       // ina219 vars
       float shunt_resistance_ohm_;
       float max_current_a_;
       float max_voltage_v_;
       uint32_t calibration_lsb_;
-    bool shutdownImminent{false};
+
+      bool shutdownImminent{false};
 };
 
 } // namespace window_controller

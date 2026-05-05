@@ -46,9 +46,6 @@ class WindowControllerHub : public PollingComponent {
     void set_boardid1_pin(InternalGPIOPin *pin) {boardid1_pin_ = pin;}
     void set_boardid2_pin(InternalGPIOPin *pin) {boardid2_pin_ = pin;}
 
-    // getters
-    uint8_t getBoardId() const;
-
     WCMotorUI motuiA;
     WCMotorUI motuiB;
   
@@ -56,16 +53,16 @@ class WindowControllerHub : public PollingComponent {
 
     // This is called by the Python code to link the UI slider to this class
     void set_target_position(WCNumber *n) {
-      this->target_position_Number = n;
+      WCNumber *n_ = n;
       // Tell the child who its parent is
-      this->target_position_Number->set_parent(this);
+      n_->set_parent(this);
 
-      if (whichMotorIsValid(this->target_position_Number->whichMotor)) {
-        if (this->target_position_Number->whichMotor == MOTOR_A) {
-          this->motuiA.target_position_Number = this->target_position_Number;
+      if (whichMotorIsValid(n_->whichMotor)) {
+        if (n_->whichMotor == MOTOR_A) {
+          this->motuiA.target_position_Number = n_;
         }
-        if (this->target_position_Number->whichMotor == MOTOR_B) {
-          this->motuiB.target_position_Number = this->target_position_Number;
+        if (n_->whichMotor == MOTOR_B) {
+          this->motuiB.target_position_Number = n_;
         }
       }
 
@@ -76,16 +73,16 @@ class WindowControllerHub : public PollingComponent {
       // });
     }
     void set_max_torque(WCNumber *n) {
-      this->max_torque_Number = n;
+      WCNumber *n_ = n;
       // Tell the child who its parent is
-      this->max_torque_Number->set_parent(this);
+      n_->set_parent(this);
 
-      if (whichMotorIsValid(this->max_torque_Number->whichMotor)) {
-        if (this->max_torque_Number->whichMotor == MOTOR_A) {
-          this->motuiA.max_torque_Number = this->max_torque_Number;
+      if (whichMotorIsValid(n_->whichMotor)) {
+        if (n_->whichMotor == MOTOR_A) {
+          this->motuiA.max_torque_Number = n_;
         }
-        if (this->max_torque_Number->whichMotor == MOTOR_B) {
-          this->motuiB.max_torque_Number = this->max_torque_Number;
+        if (n_->whichMotor == MOTOR_B) {
+          this->motuiB.max_torque_Number = n_;
         }
       }
 
@@ -97,16 +94,19 @@ class WindowControllerHub : public PollingComponent {
     }
 
     void set_window_number(WCSensor *s) {
-      this->window_number_Sensor = s;
+      // this->window_number_Sensor = s;
+      WCSensor *s_ = s;
       // Tell the child who its parent is
-      this->window_number_Sensor->set_parent(this);
+      s_->set_parent(this);
 
-      if (whichMotorIsValid(this->window_number_Sensor->whichMotor)) {
-        if (this->window_number_Sensor->whichMotor == MOTOR_A) {
-          this->motuiA.window_number_Sensor = this->window_number_Sensor;
+      if (whichMotorIsValid(s_->whichMotor)) {
+        if (s_->whichMotor == MOTOR_A) {
+          this->sensa++;
+          this->motuiA.window_number_Sensor = s_;
         }
-        if (this->window_number_Sensor->whichMotor == MOTOR_B) {
-          this->motuiB.window_number_Sensor = this->window_number_Sensor;
+        if (s_->whichMotor == MOTOR_B) {
+          this->sensb++;
+          this->motuiB.window_number_Sensor = s_;
         }
       }
 
@@ -118,16 +118,16 @@ class WindowControllerHub : public PollingComponent {
     }
 
     void set_faults(WCSensor *s) {
-      this->faults_Sensor = s;
+      WCSensor *s_ = s;
       // Tell the child who its parent is
-      this->faults_Sensor->set_parent(this);
+      s_->set_parent(this);
 
-      if (whichMotorIsValid(this->faults_Sensor->whichMotor)) {
-        if (this->faults_Sensor->whichMotor == MOTOR_A) {
-          this->motuiA.faults_Sensor = this->faults_Sensor;
+      if (whichMotorIsValid(s_->whichMotor)) {
+        if (s_->whichMotor == MOTOR_A) {
+          this->motuiA.faults_Sensor = s_;
         }
-        if (this->faults_Sensor->whichMotor == MOTOR_B) {
-          this->motuiB.faults_Sensor = this->faults_Sensor;
+        if (s_->whichMotor == MOTOR_B) {
+          this->motuiB.faults_Sensor = s_;
         }
       }
 
@@ -151,14 +151,9 @@ class WindowControllerHub : public PollingComponent {
     uint8_t boardId{0};
     uint32_t faults{0};
     bool shutdownImminent{false};
+    int sensa{0};
+    int sensb{0};
 
-    // Controls
-    WCNumber *target_position_Number{ nullptr };
-    WCNumber *max_torque_Number{ nullptr };
-
-    // Status
-    WCSensor *window_number_Sensor{nullptr};
-    WCSensor *faults_Sensor{nullptr};
 };
 
 }  // namespace esphome::window_controller

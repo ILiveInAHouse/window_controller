@@ -41,7 +41,7 @@ void WindowControllerHub::setup() {
     this->boardId = (this->boardid2_pin_->digital_read() << 2) |
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
-    if (boardId > MAX_BOARD_ID) {
+    if (this->boardId > MAX_BOARD_ID) {
         this->mark_failed();
         return;
     }
@@ -49,15 +49,17 @@ void WindowControllerHub::setup() {
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
-        if (child->getWhichMotor() == MOTOR_A) {
+        if (child->whichMotor == MOTOR_A) {
+            this->motuiA.boardId = this->boardId;
             child->child_setup(&this->motuiA);
         }
-        if (child->getWhichMotor() == MOTOR_B) {
+        if (child->whichMotor == MOTOR_B) {
+            this->motuiB.boardId = this->boardId;
             child->child_setup(&this->motuiB);
         }
     }
 
-    delay(1);
+    // delay(1);
 }
 
 //void ExampleComponent::loop() {
@@ -75,18 +77,12 @@ void WindowControllerHub::update() {
     this->boardId = (this->boardid2_pin_->digital_read() << 2) |
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
-    ESP_LOGI(TAG, " boardid: %d", this->boardId);
+    ESP_LOGI(TAG, " boardid=%d sensa=%d sensb=%d", this->boardId, this->sensa, this->sensb);
 
-    this->all_children_publish_info();
-    this->all_children_update();
-}
-
-void WindowControllerHub::all_children_update() {
-    // traditional hub architecture has each component type (sensor, fan, etc) is a new child
-    // I'm using these children to reference each motor
     for (auto *child : this->children_) {
-        child->child_update();
+        child->child_sync_update();
     }
+    this->all_children_publish_info();
 }
 
 void WindowControllerHub::all_children_publish_info() {
@@ -96,8 +92,6 @@ void WindowControllerHub::all_children_publish_info() {
         child->child_publish_info();
     }
 }
-
-uint8_t WindowControllerHub::getBoardId() const { return this->boardId; }
 
 // Called once after booting and then each time a new client connects
 //   to monitor logs
@@ -115,14 +109,6 @@ void WindowControllerHub::dump_config() {
     ESP_LOGCONFIG(TAG, "  boardId: %d", this->boardId);
 }
 
-void WindowControllerHub::all_children_dump_config() {
-    // traditional hub architecture has each component type (sensor, fan, etc) is a new child
-    // I'm using these children to reference each motor
-    for (auto *child : this->children_) {
-        child->child_dump_config();
-    }
-}
-
 // float ExampleComponent::get_setup_priority() const {
 //   // Return the setup priority of this component
 //   // Higher values mean this component will be set up later
@@ -134,9 +120,6 @@ void WindowControllerHub::on_safe_shutdown() {
   // This is called first, before any other shutdown procedures
   // ESP_LOGI(TAG, "Safe shutdown initiated");
   this->shutdownImminent = true;
-    for (auto *child : this->children_) {
-        child->child_on_safe_shutdown();
-    }
 }
 
 void WindowControllerHub::on_shutdown() {
