@@ -106,12 +106,6 @@ class WindowControllerHub : public PollingComponent {
           this->motuiB.window_number_Sensor = s_;
         }
       }
-
-      // Instead of a parent pointer, you can register a callback that
-      //   runs the parent's method
-      // this->percentage_number_->add_on_state_callback([this](float value) {
-      //     this->on_slider_changed(value);
-      // });
     }
 
     void set_faults(WCSensor *s) {
@@ -127,12 +121,6 @@ class WindowControllerHub : public PollingComponent {
           this->motuiB.faults_Sensor = s_;
         }
       }
-
-      // Instead of a parent pointer, you can register a callback that
-      //   runs the parent's method
-      // this->percentage_number_->add_on_state_callback([this](float value) {
-      //     this->on_slider_changed(value);
-      // });
     }
 
     void set_motor_status(WCSensor *s) {
@@ -148,12 +136,6 @@ class WindowControllerHub : public PollingComponent {
           this->motuiB.motor_status_Sensor = s_;
         }
       }
-
-      // Instead of a parent pointer, you can register a callback that
-      //   runs the parent's method
-      // this->percentage_number_->add_on_state_callback([this](float value) {
-      //     this->on_slider_changed(value);
-      // });
     }
 
   protected:

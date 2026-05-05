@@ -148,6 +148,18 @@ bool WindowMotorClass::powerdownINA219() {
   return FUNC_OK;
 }
 
+//
+// Control callbacks
+//
+
+void WindowMotorClass::controlTargetPosition(float value) {
+   ESP_LOGD("custom", "controlTargetPosition=%f which=%d", value, this->whichMotor);
+}
+
+//
+// Class functions
+//
+
 WindowMotorClass::WindowMotorClass() {
     // Constructor
     // Initialize class fields and configurations
@@ -216,6 +228,11 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
       return;
    }
    this->calcWinNumAndStsMsk();
+   //
+   // Set up control callbacks
+   this->ui->target_position_Number->add_on_state_callback([this](float value) {
+      this->controlTargetPosition(value);
+   });
 }
 
 void WindowMotorClass::child_publish_info() {

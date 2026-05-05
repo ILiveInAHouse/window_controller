@@ -23,6 +23,16 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void on_shutdown() override;
       void on_safe_shutdown() override;
       void dump_config() override;
+      // i2c
+      i2c::I2CDevice ina219;  // current sensor
+      bool calcINA219config();
+      bool powerdownINA219();
+      bool getBusVoltage(float *bus_voltage_v);
+      bool getCurrent(float *current_a);
+      bool getShuntVoltage(float *shunt_voltage_mv);
+
+      // Controls
+      void controlTargetPosition(float value);
 
       void setFault(uint32_t fault_bit);
       void setMotorStatus(uint16_t sts);
@@ -38,12 +48,6 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void set_pwm_pin(InternalGPIOPin *pin) {pwm_pin_ = pin;}
       void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
       void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
-      i2c::I2CDevice ina219;  // current sensor
-      bool calcINA219config();
-      bool powerdownINA219();
-      bool getBusVoltage(float *bus_voltage_v);
-      bool getCurrent(float *current_a);
-      bool getShuntVoltage(float *shunt_voltage_mv);
 
 
    protected:

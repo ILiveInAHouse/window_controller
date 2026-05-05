@@ -15,6 +15,9 @@ void WCNumber::control(float value) {
     }
 }
 
+void WindowControllerHub::print_number_change(float new_n) {
+    ESP_LOGI(TAG, "new_n=%f", new_n);
+}
 
 WindowControllerHub::WindowControllerHub() {
     // Constructor
@@ -149,10 +152,6 @@ void WindowControllerHub::on_shutdown() {
 void WindowControllerHub::register_child(WindowControllerClient *obj) {
   this->children_.push_back(obj);
   obj->set_parent(this);
-}
-
-void WindowControllerHub::print_number_change(float new_n) {
-    ESP_LOGI(TAG, "new_n=%f", new_n);
 }
 
 }  // namespace esphome::window_controller
