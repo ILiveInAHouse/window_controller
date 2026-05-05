@@ -273,6 +273,7 @@ void WindowMotorClass::child_sync_update() {
    float tar = this->ui->target_position_Number->state;
    float est = this->ui->est_position_Sensor->get_state();
    if (!isEqual(tar, est, 0.99f)) {
+      this->setMotorStatus(this->statusMask);
       ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
          (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
       if (tar < est) {
@@ -283,6 +284,9 @@ void WindowMotorClass::child_sync_update() {
       if (est > 100.0f) est = 100.0f;
       if (est < 0.0f) est = 0.0f;
       this->setEstPosition(est);
+      if (isEqual(tar, est, 0.99f)) {
+         this->setMotorStatus(0);
+      }
    }
 }
 
