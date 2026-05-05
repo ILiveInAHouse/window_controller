@@ -194,6 +194,10 @@ void WindowMotorClass::calcWinNumAndStsMsk() {
 }
 
 void WindowMotorClass::child_setup(WCMotorUI *ui) {
+   if (ui == nullptr) {
+      this->mark_failed();
+      return;
+   }
    this->ui = ui;
    this->setFault(0x0);
    if (FUNC_FAIL == this->calcINA219config()) {
@@ -227,12 +231,10 @@ void WindowMotorClass::child_sync_update() {
    this->getBusVoltage(&bus_voltage_v);
    float current_a;
    this->getCurrent(&current_a);
-   ESP_LOGI(TAG, " %c Ywin#=%d stsMsk=0x%08x bus_voltage=%2.2fV current=%2.2fA winnum_ptr=%p winnum_which=%d", 
+   ESP_LOGI(TAG, " %c win#=%d stsMsk=0x%08x bus_voltage=%2.2fV current=%2.2fA",
          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
-         bus_voltage_v, current_a, this->ui->window_number_Sensor, this->ui->window_number_Sensor->whichMotor);
-   // ESP_LOGI(TAG, "motor=%c update", (this->whichMotor == MOTOR_A) ? 'A' : 'B');
-   this->ui->window_number_Sensor->publish_state(this->windowNumber);
-   ESP_LOGI(TAG, "Ymotor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
+         bus_voltage_v, current_a);
+   // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
 }
 
 void WindowMotorClass::on_safe_shutdown() {

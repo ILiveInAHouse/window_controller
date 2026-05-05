@@ -20,6 +20,8 @@ WindowControllerHub::WindowControllerHub() {
     // Constructor
     // Initialize class fields and configurations
     this->shutdownImminent = false;
+    this->motuiA.setWhichMotor(MOTOR_A);
+    this->motuiB.setWhichMotor(MOTOR_B);
 }
 
 void WindowControllerHub::setup() {
@@ -49,11 +51,11 @@ void WindowControllerHub::setup() {
     // each component type (sensor, fan, etc) is a new child
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
-        if (child->whichMotor == MOTOR_A) {
+        if (child->getWhichMotor() == MOTOR_A) {
             this->motuiA.boardId = this->boardId;
             child->child_setup(&this->motuiA);
         }
-        if (child->whichMotor == MOTOR_B) {
+        if (child->getWhichMotor() == MOTOR_B) {
             this->motuiB.boardId = this->boardId;
             child->child_setup(&this->motuiB);
         }
@@ -77,7 +79,8 @@ void WindowControllerHub::update() {
     this->boardId = (this->boardid2_pin_->digital_read() << 2) |
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
-    ESP_LOGI(TAG, " boardid=%d sensa=%d sensb=%d", this->boardId, this->sensa, this->sensb);
+    ESP_LOGI(TAG, " boardid=%d", 
+        this->boardId);
 
     for (auto *child : this->children_) {
         child->child_sync_update();

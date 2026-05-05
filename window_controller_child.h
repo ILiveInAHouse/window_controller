@@ -19,7 +19,7 @@ class WindowControllerClient : public Parented<WindowControllerHub> {
   virtual void child_setup(WCMotorUI *ui) = 0;
   virtual void child_publish_info() = 0;
   virtual void child_sync_update() = 0;
-  WhichMotorEnum whichMotor;
+  virtual WhichMotorEnum getWhichMotor() = 0;
 
  protected:
   friend WindowControllerHub;

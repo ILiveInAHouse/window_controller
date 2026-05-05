@@ -26,10 +26,12 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
 
       void setFault(uint32_t fault_bit);
       void calcWinNumAndStsMsk();
-      void set_whichMotor(WhichMotorEnum whichMotor_) {
+      void setWhichMotor(WhichMotorEnum whichMotor_) {
          this->whichMotor = whichMotor_;
       }
-      WhichMotorEnum whichMotor;
+      WhichMotorEnum getWhichMotor() {
+         return this->whichMotor;
+      }
       void child_setup(WCMotorUI *ui);
       void child_publish_info();
       void child_sync_update();
@@ -52,6 +54,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       uint32_t faults{0};
       WCNumber *targetPosition;
       uint8_t windowNumber;
+      WhichMotorEnum whichMotor;
       InternalGPIOPin *enca_pin_{nullptr};
       InternalGPIOPin *encb_pin_{nullptr};
       InternalGPIOPin *pwm_pin_{nullptr};

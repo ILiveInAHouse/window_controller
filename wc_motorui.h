@@ -15,7 +15,6 @@ public:
    WCNumber *max_torque_Number;
    WCSensor *window_number_Sensor;
    WCSensor *faults_Sensor;
-   WhichMotorEnum whichMotor{MOTOR_NONE};
    uint8_t boardId;
    uint16_t status; // statusMask bit is set if this window has work to do
    uint16_t statusMask;
@@ -26,8 +25,15 @@ public:
    float maxTorqueSeen;
    float current;
    float rpm;
+   WhichMotorEnum getWhichMotor() {
+      return this->whichMotor;
+   }
+   void setWhichMotor(WhichMotorEnum w) {
+      this->whichMotor = w;
+   }
 
 protected:
+   WhichMotorEnum whichMotor{MOTOR_NONE};
 };
 
 // TODO: Use this to link WindowMotorClasses to the parent WindowControllerHub

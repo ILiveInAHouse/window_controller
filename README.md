@@ -27,7 +27,6 @@ window_controller:
   boardid0_pin: GPIO18
   boardid1_pin: GPIO43
   boardid2_pin: GPIO33
-  # address: 0x20 # required to make schema happy, but not used
   id: window_controller_hub_id
 
 sensor:

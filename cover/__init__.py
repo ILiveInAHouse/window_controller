@@ -55,7 +55,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await register_windowcontroller_child(var, config)
-    cg.add(var.set_whichMotor(config[CONF_WHICH_MOTOR]))
+    cg.add(var.setWhichMotor(config[CONF_WHICH_MOTOR]))
     pin = await cg.gpio_pin_expression(config[CONF_ENCA_PIN])
     cg.add(var.set_enca_pin(pin))
     pin = await cg.gpio_pin_expression(config[CONF_ENCB_PIN])

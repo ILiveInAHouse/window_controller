@@ -101,11 +101,9 @@ class WindowControllerHub : public PollingComponent {
 
       if (whichMotorIsValid(s_->whichMotor)) {
         if (s_->whichMotor == MOTOR_A) {
-          this->sensa++;
           this->motuiA.window_number_Sensor = s_;
         }
         if (s_->whichMotor == MOTOR_B) {
-          this->sensb++;
           this->motuiB.window_number_Sensor = s_;
         }
       }
@@ -151,8 +149,6 @@ class WindowControllerHub : public PollingComponent {
     uint8_t boardId{0};
     uint32_t faults{0};
     bool shutdownImminent{false};
-    int sensa{0};
-    int sensb{0};
 
 };
 
