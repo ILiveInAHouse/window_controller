@@ -92,6 +92,11 @@ number:
       name: "Target Position"
       which_motor: MOTOR_A
       device_id: motor_A_device
+    all_motor_status:
+      name: "All Motor Status"
+      which_motor: MOTOR_A
+      device_id: motor_A_device
+      mode: BOX
     max_torque:
       name: "Max Torque"
       which_motor: MOTOR_A
@@ -102,6 +107,11 @@ number:
       name: "Target Position"
       which_motor: MOTOR_B
       device_id: motor_B_device
+    all_motor_status:
+      name: "All Motor Status"
+      which_motor: MOTOR_B
+      device_id: motor_B_device
+      mode: BOX
     max_torque:
       name: "Max Torque"
       which_motor: MOTOR_B

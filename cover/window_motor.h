@@ -33,7 +33,9 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
 
       // Controls
       void controlTargetPosition(float value);
+      void controlAllMotorStatus(float value);
 
+      void pollMotorMove();
       void setFault(uint32_t fault_bit);
       void setMotorStatus(uint16_t sts);
       void setEstPosition(float pos);

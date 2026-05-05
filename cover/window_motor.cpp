@@ -155,6 +155,9 @@ bool WindowMotorClass::powerdownINA219() {
 void WindowMotorClass::controlTargetPosition(float value) {
    ESP_LOGD("custom", "controlTargetPosition=%f which=%d", value, this->whichMotor);
 }
+void WindowMotorClass::controlAllMotorStatus(float value) {
+   ESP_LOGD("custom", "controlAllMotorStatus=%f which=%d", value, this->whichMotor);
+}
 
 //
 // Class functions
@@ -241,6 +244,9 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->ui->target_position_Number->add_on_state_callback([this](float value) {
       this->controlTargetPosition(value);
    });
+   this->ui->all_motor_status_Number->add_on_state_callback([this](float value) {
+      this->controlAllMotorStatus(value);
+   });
 }
 
 void WindowMotorClass::child_publish_info() {
@@ -258,6 +264,33 @@ void WindowMotorClass::dump_config() {
 
 }
 
+void WindowMotorClass::pollMotorMove() {
+   float tar = this->ui->target_position_Number->state;
+   float est = this->ui->est_position_Sensor->get_state();
+   if (!isEqual(tar, est, 0.99f)) {
+      this->setMotorStatus(this->statusMask);
+      ESP_LOGI(TAG, " %c all_motor_status=0x%04x &stsmsk=0x%04x",
+            (this->whichMotor==MOTOR_A) ? 'A' : 'B', 
+            (int)(this->ui->all_motor_status_Number->state), 
+            (int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1));
+      if (0 == ((int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1))) {
+         ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
+            (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
+         if (tar < est) {
+            est = est - std::min(5.0f, est - tar);
+         } else {
+            est = est + std::min(5.0f, tar - est);
+         }
+         if (est > 100.0f) est = 100.0f;
+         if (est < 0.0f) est = 0.0f;
+         this->setEstPosition(est);
+         if (isEqual(tar, est, 0.99f)) {
+            this->setMotorStatus(0);
+         }
+      } // check all_motor_status
+   } // if !eq(tar,est)
+}
+
 void WindowMotorClass::child_sync_update() {
    // Called from parent hub.
    // Could do some synch work here.
@@ -270,24 +303,7 @@ void WindowMotorClass::child_sync_update() {
          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
          bus_voltage_v, current_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
-   float tar = this->ui->target_position_Number->state;
-   float est = this->ui->est_position_Sensor->get_state();
-   if (!isEqual(tar, est, 0.99f)) {
-      this->setMotorStatus(this->statusMask);
-      ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
-         (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
-      if (tar < est) {
-         est = est - std::min(5.0f, est - tar);
-      } else {
-         est = est + std::min(5.0f, tar - est);
-      }
-      if (est > 100.0f) est = 100.0f;
-      if (est < 0.0f) est = 0.0f;
-      this->setEstPosition(est);
-      if (isEqual(tar, est, 0.99f)) {
-         this->setMotorStatus(0);
-      }
-   }
+   this->pollMotorMove();
 }
 
 void WindowMotorClass::on_safe_shutdown() {

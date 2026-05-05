@@ -73,13 +73,8 @@ class WindowControllerHub : public PollingComponent {
           this->motuiB.target_position_Number = n_;
         }
       }
-
-      // Instead of a parent pointer, you can register a callback that
-      //   runs the parent's method
-      // this->percentage_number_->add_on_state_callback([this](float value) {
-      //     this->on_slider_changed(value);
-      // });
     }
+
     void set_max_torque(WCNumber *n) {
       WCNumber *n_ = n;
       // Tell the child who its parent is
@@ -93,12 +88,21 @@ class WindowControllerHub : public PollingComponent {
           this->motuiB.max_torque_Number = n_;
         }
       }
+    }
 
-      // Instead of a parent pointer, you can register a callback that
-      //   runs the parent's method
-      // this->percentage_number_->add_on_state_callback([this](float value) {
-      //     this->on_slider_changed(value);
-      // });
+    void set_all_motor_status(WCNumber *n) {
+      WCNumber *n_ = n;
+      // Tell the child who its parent is
+      n_->set_parent(this);
+
+      if (whichMotorIsValid(n_->whichMotor)) {
+        if (n_->whichMotor == MOTOR_A) {
+          this->motuiA.all_motor_status_Number = n_;
+        }
+        if (n_->whichMotor == MOTOR_B) {
+          this->motuiB.all_motor_status_Number = n_;
+        }
+      }
     }
 
     void set_window_number(WCSensor *s) {

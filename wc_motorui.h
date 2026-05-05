@@ -13,12 +13,12 @@ class WCMotorUI {
 public:
    WCNumber *target_position_Number;
    WCNumber *max_torque_Number;
+   WCNumber *all_motor_status_Number; // input from Hass
    WCSensor *window_number_Sensor;
    WCSensor *faults_Sensor;
    WCSensor *motor_status_Sensor;
    WCSensor *est_position_Sensor;
    uint8_t boardId;
-   uint16_t allMotorStatus;  // input from Hass
    float numRotationsToFullOpen;
    float currentRotationIndex;
    float maxTorqueSeen;
