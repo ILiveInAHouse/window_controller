@@ -36,6 +36,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
 
       void setFault(uint32_t fault_bit);
       void setMotorStatus(uint16_t sts);
+      void setEstPosition(float pos);
       void calcWinNumAndStsMsk();
       void setWhichMotor(WhichMotorEnum whichMotor_) {this->whichMotor = whichMotor_;}
       WhichMotorEnum getWhichMotor() {return this->whichMotor;}

@@ -29,6 +29,7 @@ CONF_WHICH_MOTOR = "which_motor"
 CONF_WINDOW_NUMBER = "window_number"
 CONF_FAULTS = "faults"
 CONF_MOTOR_STATUS = "motor_status"
+CONF_EST_POSITION = "est_position"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_WINDOW_CONTROLLER_ID): cv.use_id(WindowControllerHub),
@@ -36,6 +37,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_WINDOW_NUMBER): sensor.sensor_schema(WCSensor),
     cv.Optional(CONF_FAULTS): sensor.sensor_schema(WCSensor),
     cv.Optional(CONF_MOTOR_STATUS): sensor.sensor_schema(WCSensor),
+    cv.Optional(CONF_EST_POSITION): sensor.sensor_schema(WCSensor),
 })
 
 async def to_code(config):
@@ -52,4 +54,8 @@ async def to_code(config):
         var = await sensor.new_sensor(motor_status_conf)
         cg.add(var.set_which_motor(config[CONF_WHICH_MOTOR]))
         cg.add(parent.set_motor_status(var))
+    if est_position_conf := config.get(CONF_EST_POSITION):
+        var = await sensor.new_sensor(est_position_conf)
+        cg.add(var.set_which_motor(config[CONF_WHICH_MOTOR]))
+        cg.add(parent.set_est_position(var))
        

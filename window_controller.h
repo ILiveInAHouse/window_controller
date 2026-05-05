@@ -23,6 +23,14 @@
 // Namespace definition
 namespace esphome::window_controller {
 
+inline bool isEqual(float f1, float f2, float delta) {
+   if (std::abs(f1-f2) > std::abs(delta)) {
+      return false;
+   } else {
+      return true;
+   }
+}
+
 // Forward declarations
 class WindowControllerClient;
 class WindowControllerHub;
@@ -134,6 +142,21 @@ class WindowControllerHub : public PollingComponent {
         }
         if (s_->whichMotor == MOTOR_B) {
           this->motuiB.motor_status_Sensor = s_;
+        }
+      }
+    }
+
+    void set_est_position(WCSensor *s) {
+      WCSensor *s_ = s;
+      // Tell the child who its parent is
+      s_->set_parent(this);
+
+      if (whichMotorIsValid(s_->whichMotor)) {
+        if (s_->whichMotor == MOTOR_A) {
+          this->motuiA.est_position_Sensor = s_;
+        }
+        if (s_->whichMotor == MOTOR_B) {
+          this->motuiB.est_position_Sensor = s_;
         }
       }
     }

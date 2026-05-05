@@ -16,6 +16,7 @@ public:
    WCSensor *window_number_Sensor;
    WCSensor *faults_Sensor;
    WCSensor *motor_status_Sensor;
+   WCSensor *est_position_Sensor;
    uint8_t boardId;
    uint16_t allMotorStatus;  // input from Hass
    float numRotationsToFullOpen;

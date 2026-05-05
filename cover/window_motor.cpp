@@ -179,6 +179,11 @@ void WindowMotorClass::setMotorStatus(uint16_t sts) {
    this->ui->motor_status_Sensor->publish_state(this->ui->motor_status);
 }
 
+void WindowMotorClass::setEstPosition(float pos) {
+   //this->ui->est_position_Sensor->set_state_value(pos);
+   this->ui->est_position_Sensor->publish_state(pos);
+}
+
 void WindowMotorClass::setup() {
    // this->ui may not be available when this runs
 }
@@ -222,13 +227,16 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->ui = ui;
    this->setFault(0x0);
    this->setMotorStatus(0x0);
+   this->setEstPosition(0.0f);
+
+   // Set up i2c
    if (FUNC_FAIL == this->calcINA219config()) {
       this->setFault(MOTFAULT_INA219_INIT);
       this->mark_failed();
       return;
    }
    this->calcWinNumAndStsMsk();
-   //
+
    // Set up control callbacks
    this->ui->target_position_Number->add_on_state_callback([this](float value) {
       this->controlTargetPosition(value);
@@ -262,6 +270,20 @@ void WindowMotorClass::child_sync_update() {
          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
          bus_voltage_v, current_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
+   float tar = this->ui->target_position_Number->state;
+   float est = this->ui->est_position_Sensor->get_state();
+   if (!isEqual(tar, est, 0.99f)) {
+      ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
+         (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
+      if (tar < est) {
+         est = est - std::min(5.0f, est - tar);
+      } else {
+         est = est + std::min(5.0f, tar - est);
+      }
+      if (est > 100.0f) est = 100.0f;
+      if (est < 0.0f) est = 0.0f;
+      this->setEstPosition(est);
+   }
 }
 
 void WindowMotorClass::on_safe_shutdown() {

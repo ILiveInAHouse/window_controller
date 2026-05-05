@@ -42,7 +42,7 @@ CONFIG_SCHEMA = (
             # cv.Optional(CONF_BAZ): cv.int_range(0, 255),
         }
     )
-    .extend(cv.polling_component_schema("5s"))
+    .extend(cv.polling_component_schema("2s"))
     #.extend(cv.COMPONENT_SCHEMA).extend(i2c.i2c_device_schema(0x40)) # Default I2C address
     # .extend(i2c.i2c_device_schema(None))
 )

@@ -42,6 +42,9 @@ sensor:
     motor_status:
       device_id: motor_A_device
       name: "Motor Status"
+    est_position:
+      device_id: motor_A_device
+      name: "Est Position"
   - platform: window_controller
     window_controller_id: window_controller_hub_id
     which_motor: MOTOR_B
@@ -54,6 +57,9 @@ sensor:
     motor_status:
       device_id: motor_B_device
       name: "Motor Status"
+    est_position:
+      device_id: motor_B_device
+      name: "Est Position"
 
 cover:
   - platform: window_controller
