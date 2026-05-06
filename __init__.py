@@ -1,6 +1,6 @@
 import esphome.config_validation as cv
 from esphome import pins
-from esphome.components import i2c
+from esphome.components import i2c, output
 import esphome.codegen as cg
 from esphome.const import (
     CONF_ID,
@@ -17,6 +17,8 @@ CONF_WINDOWCONTROLLER_ID = "window_controller_id"
 CONF_BOARDID0_PIN = "boardid0_pin"
 CONF_BOARDID1_PIN = "boardid1_pin"
 CONF_BOARDID2_PIN = "boardid2_pin"
+CONF_MOTOR_A_PWM = "motor_a_pwm"
+CONF_MOTOR_B_PWM = "motor_b_pwm"
 
 # C++ namespace
 window_controller_ns = cg.esphome_ns.namespace("window_controller")
@@ -36,7 +38,8 @@ CONFIG_SCHEMA = (
             cv.Required(CONF_BOARDID0_PIN): pins.gpio_input_pin_schema,
             cv.Required(CONF_BOARDID1_PIN): pins.gpio_input_pin_schema,
             cv.Required(CONF_BOARDID2_PIN): pins.gpio_input_pin_schema,
-
+            cv.Required(CONF_MOTOR_A_PWM): cv.use_id(output.FloatOutput),
+            cv.Required(CONF_MOTOR_B_PWM): cv.use_id(output.FloatOutput),
             # Optional example
             # cv.Optional(CONF_BAZ): cv.int_range(0, 255),
         }
@@ -67,5 +70,8 @@ async def to_code(config):
     cg.add(var.set_boardid1_pin(pin))
     pin = await cg.gpio_pin_expression(config[CONF_BOARDID2_PIN])
     cg.add(var.set_boardid2_pin(pin))
-
+    pwm_a = await cg.get_variable(config[CONF_MOTOR_A_PWM])
+    cg.add(var.set_pwm_a(pwm_a))
+    pwm_b = await cg.get_variable(config[CONF_MOTOR_B_PWM])
+    cg.add(var.set_pwm_b(pwm_b))
 # Configure the component

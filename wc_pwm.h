@@ -10,7 +10,7 @@ namespace esphome::window_controller {
 class WindowControllerHub;
 
 // Create a non-abstract sensor class
-class WCPWM : public output::FloatOutput {
+class WCPWM : public output::FloatOutput, public Component {
 public:
   explicit WCPWM(InternalGPIOPin *pin) : pin_(pin) {}
   // Store a pointer to the parent hub
@@ -18,6 +18,7 @@ public:
   void set_which_motor(WhichMotorEnum which) {this->whichMotor = which; }
   WhichMotorEnum whichMotor{MOTOR_NONE};
   void write_state(float state) override {this->set_level(state);}
+  float get_setup_priority() const override { return setup_priority::HARDWARE; }
 protected:
   WindowControllerHub *parent_;
   InternalGPIOPin *pin_;

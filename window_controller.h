@@ -166,19 +166,11 @@ class WindowControllerHub : public PollingComponent {
       }
     }
 
-    void set_pwm(WCPWM *o, WhichMotorEnum which) {
-      WCPWM *o_ = o;
-      // Tell the child who its parent is
-      o_->set_parent(this);
-
-      if (whichMotorIsValid(which)) {
-        if (which == MOTOR_A) {
-          this->motuiA.pwm_FloatOutput = o_;
-        }
-        if (which == MOTOR_B) {
-          this->motuiB.pwm_FloatOutput = o_;
-        }
-      }
+    void set_pwm_a(output::FloatOutput *pwm) {
+      this->motuiA.pwm_FloatOutput = pwm;
+    }
+    void set_pwm_b(output::FloatOutput *pwm) {
+      this->motuiB.pwm_FloatOutput = pwm;
     }
 
   protected:

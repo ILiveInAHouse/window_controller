@@ -225,7 +225,7 @@ void WindowMotorClass::setEstPosition(float pos) {
 
 void WindowMotorClass::setPwm(float duty) {
    this->ui->pwm_FloatOutput->set_level(duty);
-   //ESP_LOGI(TAG, " which=%c pwm=%p", (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->ui->pwm_FloatOutput);
+   ESP_LOGI(TAG, " which=%c pwm=%p duty=%1.2f", (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->ui->pwm_FloatOutput, duty);
 }
 
 void WindowMotorClass::setup() {
@@ -359,8 +359,8 @@ void WindowMotorClass::child_sync_update() {
    this->getBusVoltage(&bus_voltage_v);
    float current_a;
    this->getCurrent(&current_a);
-   ESP_LOGI(TAG, " %c current=%2.2fA pwm=%p",
-          (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, this->ui->pwm_FloatOutput);
+   // ESP_LOGI(TAG, " %c current=%2.2fA pwm=%p",
+   //        (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, this->ui->pwm_FloatOutput);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
    this->pollMotorMove();
 }
