@@ -167,7 +167,6 @@ void WindowMotorClass::controlAllMotorStatus(float value) {
 bool WindowMotorClass::setup_pins() {
    if ((this->enca_pin_ == nullptr) || 
        (this->encb_pin_ == nullptr) || 
-       (this->pwm_pin_ == nullptr) || 
        (this->in1_pin_ == nullptr) || 
        (this->in2_pin_ == nullptr)) {
       return FUNC_FAIL;
@@ -178,7 +177,6 @@ bool WindowMotorClass::setup_pins() {
     this->in2_pin_->setup();
     this->in2_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
-    this->pwm_pin_->set_level(0.0f);
     return FUNC_OK;
 }
 
@@ -226,7 +224,8 @@ void WindowMotorClass::setEstPosition(float pos) {
 }
 
 void WindowMotorClass::setPwm(float duty) {
-   this->pwm_FloatOutput->write_state(duty);
+   this->ui->pwm_FloatOutput->write_state(duty);
+   //ESP_LOGI(TAG, " which=%c pwm=%p", (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->ui->pwm_FloatOutput);
 }
 
 void WindowMotorClass::setup() {

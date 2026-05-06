@@ -42,9 +42,9 @@ async def to_code(config):
     parent = await cg.get_variable(config[CONF_WINDOW_CONTROLLER_ID])
     if pwm_conf := config.get(CONF_PWM):
         gpio = await cg.gpio_pin_expression(pwm_conf[CONF_PIN])
-        var = cg.new_Pvariable(config[CONF_ID], gpio)
+        var = cg.new_Pvariable(pwm_conf[CONF_ID], gpio)
         # await cg.register_component(var, config)
-        await output.register_output(var, config)
+        await output.register_output(var, pwm_conf)
         cg.add(var.set_which_motor(config[CONF_WHICH_MOTOR]))
         cg.add(parent.set_pwm(var))
        
