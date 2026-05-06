@@ -27,6 +27,9 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void on_shutdown() override;
       void on_safe_shutdown() override;
       void dump_config() override;
+      float get_setup_priority() const override { 
+         return esphome::setup_priority::DATA; // Lower priority than HARDWARE
+      }
       // i2c
       i2c::I2CDevice ina219;  // current sensor
       bool calcINA219config();

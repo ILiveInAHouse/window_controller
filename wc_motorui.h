@@ -2,8 +2,8 @@
 
 #include "wc_number.h"
 #include "wc_sensor.h"
-#include "wc_pwm.h"
 #include "wc_whichmotor.h"
+#include "wc_pwm.h"
 
 // Namespace definition
 namespace esphome::window_controller {
@@ -12,15 +12,15 @@ namespace esphome::window_controller {
 // Also put config info from the hub for the WindowMotorClasses to use.
 class WCMotorUI {
 public:
-   WCNumber *target_position_Number;
-   WCNumber *max_torque_Number;
-   WCNumber *all_motor_status_Number; // input from Hass
-   WCSensor *window_number_Sensor;
-   WCSensor *faults_Sensor;
-   WCSensor *motor_status_Sensor;  // statusMask bit is set if this window has work to do
-   WCSensor *est_position_Sensor;
-   WCSensor *uptime_Sensor;
-   WCPWM *pwm_FloatOutput;
+   WCNumber *target_position_Number{nullptr};
+   WCNumber *max_torque_Number{nullptr};
+   WCNumber *all_motor_status_Number{nullptr}; // input from Hass
+   WCSensor *window_number_Sensor{nullptr};
+   WCSensor *faults_Sensor{nullptr};
+   WCSensor *motor_status_Sensor{nullptr};  // statusMask bit is set if this window has work to do
+   WCSensor *est_position_Sensor{nullptr};
+   WCSensor *uptime_Sensor{nullptr};
+   output::FloatOutput *pwm_FloatOutput{nullptr};
    uint8_t boardId;
    float numRotationsToFullOpen;
    float currentRotationIndex;

@@ -224,7 +224,7 @@ void WindowMotorClass::setEstPosition(float pos) {
 }
 
 void WindowMotorClass::setPwm(float duty) {
-   this->ui->pwm_FloatOutput->write_state(duty);
+   this->ui->pwm_FloatOutput->set_level(duty);
    //ESP_LOGI(TAG, " which=%c pwm=%p", (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->ui->pwm_FloatOutput);
 }
 
@@ -272,7 +272,7 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->setFault(0x0);
    this->setMotorStatus(0x0);
    this->setEstPosition(0.0f);
-   this->setPwm(0.0f);
+   //this->setPwm(0.0f);
 
    // Set up i2c
    if (FUNC_FAIL == this->calcINA219config()) {
@@ -359,9 +359,8 @@ void WindowMotorClass::child_sync_update() {
    this->getBusVoltage(&bus_voltage_v);
    float current_a;
    this->getCurrent(&current_a);
-   // ESP_LOGI(TAG, " %c win#=%d stsMsk=0x%04x bus_voltage=%2.2fV current=%2.2fA",
-   //       (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
-   //       bus_voltage_v, current_a);
+   ESP_LOGI(TAG, " %c current=%2.2fA pwm=%p",
+          (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, this->ui->pwm_FloatOutput);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
    this->pollMotorMove();
 }

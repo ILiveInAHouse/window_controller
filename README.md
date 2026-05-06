@@ -37,7 +37,7 @@ output:
       # device_id: motor_A_device
       # name: "PWM"
       pin: GPIO5
-      id: pwmb_output_id
+      id: pwma_output_id
       # frequency: "1kHz"
   - platform: window_controller
     window_controller_id: window_controller_hub_id
@@ -46,7 +46,7 @@ output:
       # device_id: motor_B_device
       # name: "PWM"
       pin: GPIO6
-      id: pwma_output_id
+      id: pwmb_output_id
       # frequency: "1kHz"
 
 sensor:
@@ -88,7 +88,6 @@ cover:
     which_motor: MOTOR_A
     enca_pin: GPIO14
     encb_pin: GPIO4
-    pwm_pin: GPIO5
     in1_pin: GPIO35
     in2_pin: GPIO36
     ina219_address: 0x40
@@ -99,7 +98,6 @@ cover:
     which_motor: MOTOR_B
     enca_pin: GPIO17
     encb_pin: GPIO7
-    pwm_pin: GPIO6
     in1_pin: GPIO37
     in2_pin: GPIO38
     ina219_address: 0x41
