@@ -8,7 +8,6 @@
 #include "wc_number.h"
 #include "wc_whichmotor.h"
 #include "wc_sensor.h"
-#include "wc_pwm.h"
 #include "wc_motorui.h"
 
 // window motor faults

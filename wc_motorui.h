@@ -3,7 +3,6 @@
 #include "wc_number.h"
 #include "wc_sensor.h"
 #include "wc_whichmotor.h"
-#include "wc_pwm.h"
 #include "esphome/components/output/float_output.h"
 
 // Namespace definition
