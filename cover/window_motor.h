@@ -13,6 +13,9 @@ namespace esphome {
 namespace window_controller {
 
 #define MOTFAULT_INA219_INIT 0x1
+#define MOTFAULT_PIN_INIT 0x2
+
+enum MotorDriverModeEnum { MOTMODE_CW = 0, MOTMODE_CCW = 1, MOTMODE_SHORTBRAKE = 2, MOTMODE_STOP=3 };
 
 class WindowMotorClass : public WindowControllerClient, public PollingComponent, public i2c::I2CDevice {
    public:
@@ -35,6 +38,9 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void controlTargetPosition(float value);
       void controlAllMotorStatus(float value);
 
+      // Pin Control
+      bool setup_pins();
+      void setMotorDriverMode(MotorDriverModeEnum mode);
       void pollMotorMove();
       void setFault(uint32_t fault_bit);
       void setMotorStatus(uint16_t sts);

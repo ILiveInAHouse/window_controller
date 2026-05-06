@@ -16,8 +16,9 @@ public:
    WCNumber *all_motor_status_Number; // input from Hass
    WCSensor *window_number_Sensor;
    WCSensor *faults_Sensor;
-   WCSensor *motor_status_Sensor;
+   WCSensor *motor_status_Sensor;  // statusMask bit is set if this window has work to do
    WCSensor *est_position_Sensor;
+   WCSensor *uptime_Sensor;
    uint8_t boardId;
    float numRotationsToFullOpen;
    float currentRotationIndex;
@@ -26,8 +27,6 @@ public:
    float rpm;
    WhichMotorEnum getWhichMotor() {return this->whichMotor;}
    void setWhichMotor(WhichMotorEnum w) {this->whichMotor = w;}
-   uint32_t faults;
-   uint16_t motor_status; // statusMask bit is set if this window has work to do
 
 protected:
    WhichMotorEnum whichMotor{MOTOR_NONE};

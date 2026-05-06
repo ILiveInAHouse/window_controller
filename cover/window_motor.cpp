@@ -7,6 +7,8 @@ namespace window_controller {
 
 static const char *const TAG = "windowmotor";
 
+// Note: ac_dimmer component has GPIO interrupts and PWM output
+
 static const uint8_t INA219_READ = 0x01;
 static const uint8_t INA219_REGISTER_CONFIG = 0x00;
 static const uint8_t INA219_REGISTER_SHUNT_VOLTAGE = 0x01;
@@ -151,7 +153,6 @@ bool WindowMotorClass::powerdownINA219() {
 //
 // Control callbacks
 //
-
 void WindowMotorClass::controlTargetPosition(float value) {
    ESP_LOGD("custom", "controlTargetPosition=%f which=%d", value, this->whichMotor);
 }
@@ -159,10 +160,50 @@ void WindowMotorClass::controlAllMotorStatus(float value) {
    ESP_LOGD("custom", "controlAllMotorStatus=%f which=%d", value, this->whichMotor);
 }
 
+
+//
+// Pin control
+//
+bool WindowMotorClass::setup_pins() {
+   if ((this->enca_pin_ == nullptr) || 
+       (this->encb_pin_ == nullptr) || 
+       (this->pwm_pin_ == nullptr) || 
+       (this->in1_pin_ == nullptr) || 
+       (this->in2_pin_ == nullptr)) {
+      return FUNC_FAIL;
+    }
+
+    this->in1_pin_->setup();
+    this->in1_pin_->pin_mode(gpio::FLAG_OUTPUT);
+    this->in2_pin_->setup();
+    this->in2_pin_->pin_mode(gpio::FLAG_OUTPUT);
+    return FUNC_OK;
+}
+
+void WindowMotorClass::setMotorDriverMode(MotorDriverModeEnum mode) {
+   switch(mode) {
+      case MOTMODE_CW:
+         this->in1_pin_->digital_write(true);
+         this->in2_pin_->digital_write(false);
+         break;
+      case MOTMODE_CCW:
+         this->in1_pin_->digital_write(false);
+         this->in2_pin_->digital_write(true);
+         break;
+      case MOTMODE_SHORTBRAKE:
+         this->in1_pin_->digital_write(true);
+         this->in2_pin_->digital_write(true);
+         break;
+      case MOTMODE_STOP:
+         this->in1_pin_->digital_write(false);
+         this->in2_pin_->digital_write(false);
+         break;
+   }
+}
+
 //
 // Class functions
 //
-
 WindowMotorClass::WindowMotorClass() {
     // Constructor
     // Initialize class fields and configurations
@@ -174,12 +215,7 @@ void WindowMotorClass::setFault(uint32_t fault_bit) {
 }
 
 void WindowMotorClass::setMotorStatus(uint16_t sts) {
-   if (sts) {
-      this->ui->motor_status = sts;
-   } else {
-      this->ui->motor_status = 0;
-   }
-   this->ui->motor_status_Sensor->publish_state(this->ui->motor_status);
+   this->ui->motor_status_Sensor->publish_state(sts);
 }
 
 void WindowMotorClass::setEstPosition(float pos) {
@@ -238,6 +274,8 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
       this->mark_failed();
       return;
    }
+
+   // Calculate window number and statusMask
    this->calcWinNumAndStsMsk();
 
    // Set up control callbacks
@@ -247,6 +285,16 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->ui->all_motor_status_Number->add_on_state_callback([this](float value) {
       this->controlAllMotorStatus(value);
    });
+
+   // Set up pins
+   if (this->setup_pins() == FUNC_FAIL) {
+      this->setFault(MOTFAULT_PIN_INIT);
+      this->mark_failed();
+      return;
+   }
+
+   this->setMotorDriverMode(MOTMODE_STOP);
+
 }
 
 void WindowMotorClass::child_publish_info() {
@@ -274,17 +322,21 @@ void WindowMotorClass::pollMotorMove() {
             (int)(this->ui->all_motor_status_Number->state), 
             (int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1));
       if (0 == ((int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1))) {
+         // No other motors below me have work to do, so it's ok for me to do work.
          ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
          if (tar < est) {
+            this->setMotorDriverMode(MOTMODE_CW);
             est = est - std::min(5.0f, est - tar);
          } else {
+            this->setMotorDriverMode(MOTMODE_CCW);
             est = est + std::min(5.0f, tar - est);
          }
          if (est > 100.0f) est = 100.0f;
          if (est < 0.0f) est = 0.0f;
          this->setEstPosition(est);
          if (isEqual(tar, est, 0.99f)) {
+            this->setMotorDriverMode(MOTMODE_STOP);
             this->setMotorStatus(0);
          }
       } // check all_motor_status
@@ -299,9 +351,9 @@ void WindowMotorClass::child_sync_update() {
    this->getBusVoltage(&bus_voltage_v);
    float current_a;
    this->getCurrent(&current_a);
-   ESP_LOGI(TAG, " %c win#=%d stsMsk=0x%04x bus_voltage=%2.2fV current=%2.2fA",
-         (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
-         bus_voltage_v, current_a);
+   // ESP_LOGI(TAG, " %c win#=%d stsMsk=0x%04x bus_voltage=%2.2fV current=%2.2fA",
+   //       (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->windowNumber, this->statusMask, 
+   //       bus_voltage_v, current_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
    this->pollMotorMove();
 }

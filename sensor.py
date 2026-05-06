@@ -34,10 +34,10 @@ CONF_EST_POSITION = "est_position"
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_WINDOW_CONTROLLER_ID): cv.use_id(WindowControllerHub),
     cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
-    cv.Optional(CONF_WINDOW_NUMBER): sensor.sensor_schema(WCSensor),
-    cv.Optional(CONF_FAULTS): sensor.sensor_schema(WCSensor),
-    cv.Optional(CONF_MOTOR_STATUS): sensor.sensor_schema(WCSensor),
-    cv.Optional(CONF_EST_POSITION): sensor.sensor_schema(WCSensor),
+    cv.Required(CONF_WINDOW_NUMBER): sensor.sensor_schema(WCSensor),
+    cv.Required(CONF_FAULTS): sensor.sensor_schema(WCSensor),
+    cv.Required(CONF_MOTOR_STATUS): sensor.sensor_schema(WCSensor),
+    cv.Required(CONF_EST_POSITION): sensor.sensor_schema(WCSensor),
 })
 
 async def to_code(config):

@@ -82,8 +82,7 @@ void WindowControllerHub::update() {
     this->boardId = (this->boardid2_pin_->digital_read() << 2) |
                     (this->boardid1_pin_->digital_read() << 1) |
                     (this->boardid0_pin_->digital_read() << 0);
-    ESP_LOGI(TAG, " boardid=%d", 
-        this->boardId);
+    // ESP_LOGI(TAG, " boardid=%d", this->boardId);
 
     for (auto *child : this->children_) {
         child->child_sync_update();
