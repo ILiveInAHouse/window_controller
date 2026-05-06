@@ -23,31 +23,23 @@ external_components:
       type: local
       path: ../components
 
+output:
+  - platform: ledc
+    pin: GPIO5
+    id: motor_a_pwm_id
+    frequency: 1000Hz
+  - platform: ledc
+    pin: GPIO6
+    id: motor_b_pwm_id
+    frequency: 1000Hz
+
 window_controller:
   boardid0_pin: GPIO18
   boardid1_pin: GPIO43
   boardid2_pin: GPIO33
   id: window_controller_hub_id
-
-output:
-  - platform: window_controller
-    window_controller_id: window_controller_hub_id
-    which_motor: MOTOR_A
-    pwm:
-      # device_id: motor_A_device
-      # name: "PWM"
-      pin: GPIO5
-      id: pwma_output_id
-      # frequency: "1kHz"
-  - platform: window_controller
-    window_controller_id: window_controller_hub_id
-    which_motor: MOTOR_B
-    pwm:
-      # device_id: motor_B_device
-      # name: "PWM"
-      pin: GPIO6
-      id: pwmb_output_id
-      # frequency: "1kHz"
+  motor_a_pwm: motor_a_pwm_id
+  motor_b_pwm: motor_b_pwm_id
 
 sensor:
   - platform: window_controller
