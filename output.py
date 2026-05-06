@@ -29,12 +29,12 @@ CONF_PWM = "pwm"
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_WINDOW_CONTROLLER_ID): cv.use_id(WindowControllerHub),
     cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
-    cv.Required(CONF_PWM): output.FLOAT_OUTPUT_SCHEMA(WCPWM).extend({
+    cv.Required(CONF_PWM): output.FLOAT_OUTPUT_SCHEMA.extend({
         cv.Required(CONF_ID): cv.declare_id(WCPWM),
         cv.Required(CONF_PIN): pins.internal_gpio_output_pin_schema,
-        cv.Optional(CONF_FREQUENCY, default="1kHz"): cv.All(
-            cv.frequency, cv.float_range(min=0, min_include=False)
-        ),
+        # cv.Optional(CONF_FREQUENCY, default="1kHz"): cv.All(
+        #     cv.frequency, cv.float_range(min=0, min_included=False)
+        # ),
     }),
 })
 

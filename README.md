@@ -29,6 +29,26 @@ window_controller:
   boardid2_pin: GPIO33
   id: window_controller_hub_id
 
+output:
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    which_motor: MOTOR_A
+    pwm:
+      # device_id: motor_A_device
+      # name: "PWM"
+      pin: GPIO5
+      id: pwmb_output_id
+      # frequency: "1kHz"
+  - platform: window_controller
+    window_controller_id: window_controller_hub_id
+    which_motor: MOTOR_B
+    pwm:
+      # device_id: motor_B_device
+      # name: "PWM"
+      pin: GPIO6
+      id: pwma_output_id
+      # frequency: "1kHz"
+
 sensor:
   - platform: window_controller
     window_controller_id: window_controller_hub_id
