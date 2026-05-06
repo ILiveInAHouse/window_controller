@@ -2,6 +2,7 @@
 
 #include "wc_number.h"
 #include "wc_sensor.h"
+#include "wc_float_output.h"
 #include "wc_whichmotor.h"
 
 // Namespace definition
@@ -19,6 +20,7 @@ public:
    WCSensor *motor_status_Sensor;  // statusMask bit is set if this window has work to do
    WCSensor *est_position_Sensor;
    WCSensor *uptime_Sensor;
+   WCPWM *pwm_FloatOutput;
    uint8_t boardId;
    float numRotationsToFullOpen;
    float currentRotationIndex;

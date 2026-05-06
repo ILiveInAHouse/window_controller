@@ -1,5 +1,6 @@
 #pragma once
 
+#include "esphome.h"
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/components/i2c/i2c.h"
@@ -45,6 +46,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void setFault(uint32_t fault_bit);
       void setMotorStatus(uint16_t sts);
       void setEstPosition(float pos);
+      void setPwm(float duty);
       void calcWinNumAndStsMsk();
       void setWhichMotor(WhichMotorEnum whichMotor_) {this->whichMotor = whichMotor_;}
       WhichMotorEnum getWhichMotor() {return this->whichMotor;}
@@ -54,9 +56,10 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       WCMotorUI *ui;
       void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
       void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
-      void set_pwm_pin(InternalGPIOPin *pin) {pwm_pin_ = pin;}
+      void set_pwm_pin(output::FloatOutput *pin) {pwm_pin_ = pin;}
       void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
       void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
+      WindowMotorClass(output::FloatOutput *pwm_pin) : pwm_pin_(pwm_pin) {}
 
 
    protected:
@@ -67,7 +70,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       uint16_t statusMask;
       InternalGPIOPin *enca_pin_{nullptr};
       InternalGPIOPin *encb_pin_{nullptr};
-      InternalGPIOPin *pwm_pin_{nullptr};
+      output::FloatOutput *pwm_pin_{nullptr};
       InternalGPIOPin *in1_pin_{nullptr};
       InternalGPIOPin *in2_pin_{nullptr};
 

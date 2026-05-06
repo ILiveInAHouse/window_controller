@@ -8,6 +8,7 @@
 #include "wc_number.h"
 #include "wc_whichmotor.h"
 #include "wc_sensor.h"
+#include "wc_float_output.h"
 #include "wc_motorui.h"
 
 // window motor faults
@@ -161,6 +162,21 @@ class WindowControllerHub : public PollingComponent {
         }
         if (s_->whichMotor == MOTOR_B) {
           this->motuiB.est_position_Sensor = s_;
+        }
+      }
+    }
+
+    void set_pwm(WCPWM *o) {
+      WCPWM *o_ = o;
+      // Tell the child who its parent is
+      o_->set_parent(this);
+
+      if (whichMotorIsValid(o_->whichMotor)) {
+        if (o_->whichMotor == MOTOR_A) {
+          this->motuiA.pwm_FloatOutput = o_;
+        }
+        if (o_->whichMotor == MOTOR_B) {
+          this->motuiB.pwm_FloatOutput = o_;
         }
       }
     }

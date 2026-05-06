@@ -177,6 +177,8 @@ bool WindowMotorClass::setup_pins() {
     this->in1_pin_->pin_mode(gpio::FLAG_OUTPUT);
     this->in2_pin_->setup();
     this->in2_pin_->pin_mode(gpio::FLAG_OUTPUT);
+
+    this->pwm_pin_->set_level(0.0f);
     return FUNC_OK;
 }
 
@@ -223,6 +225,10 @@ void WindowMotorClass::setEstPosition(float pos) {
    this->ui->est_position_Sensor->publish_state(pos);
 }
 
+void WindowMotorClass::setPwm(float duty) {
+   this->pwm_FloatOutput->write_state(duty);
+}
+
 void WindowMotorClass::setup() {
    // this->ui may not be available when this runs
 }
@@ -267,6 +273,7 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->setFault(0x0);
    this->setMotorStatus(0x0);
    this->setEstPosition(0.0f);
+   this->setPwm(0.0f);
 
    // Set up i2c
    if (FUNC_FAIL == this->calcINA219config()) {
@@ -306,7 +313,7 @@ void WindowMotorClass::dump_config() {
     LOG_I2C_DEVICE(this);
     LOG_PIN("  enca_pin: ", this->enca_pin_);
     LOG_PIN("  encb_pin: ", this->encb_pin_);
-    LOG_PIN("  pwm_pin: ", this->pwm_pin_);
+   //  LOG_PIN("  pwm_pin: ", this->pwm_pin_);
     LOG_PIN("  in1_pin: ", this->in1_pin_);
     LOG_PIN("  in2_pin: ", this->in2_pin_);
 
@@ -327,15 +334,17 @@ void WindowMotorClass::pollMotorMove() {
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
          if (tar < est) {
             this->setMotorDriverMode(MOTMODE_CW);
+               this->setPwm(0.5f);
             est = est - std::min(5.0f, est - tar);
          } else {
             this->setMotorDriverMode(MOTMODE_CCW);
+            this->setPwm(0.5f);
             est = est + std::min(5.0f, tar - est);
          }
-         if (est > 100.0f) est = 100.0f;
-         if (est < 0.0f) est = 0.0f;
+         est = clamp(est, 0.0f, 100.0f);
          this->setEstPosition(est);
          if (isEqual(tar, est, 0.99f)) {
+            this->setPwm(0.0f);
             this->setMotorDriverMode(MOTMODE_STOP);
             this->setMotorStatus(0);
          }

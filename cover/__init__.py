@@ -41,7 +41,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
         cv.Required(CONF_ENCA_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_ENCB_PIN): pins.gpio_input_pin_schema,
-        cv.Required(CONF_PWM_PIN): pins.gpio_input_pin_schema,
+        # cv.Required(CONF_PWM_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_IN1_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_IN2_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_INA219_ADDRESS): cv.i2c_address,
@@ -60,8 +60,8 @@ async def to_code(config):
     cg.add(var.set_enca_pin(pin))
     pin = await cg.gpio_pin_expression(config[CONF_ENCB_PIN])
     cg.add(var.set_encb_pin(pin))
-    pin = await cg.gpio_pin_expression(config[CONF_PWM_PIN])
-    cg.add(var.set_pwm_pin(pin))
+    # pin = await cg.gpio_pin_expression(config[CONF_PWM_PIN])
+    # cg.add(var.set_pwm_pin(pin))
     pin = await cg.gpio_pin_expression(config[CONF_IN1_PIN])
     cg.add(var.set_in1_pin(pin))
     pin = await cg.gpio_pin_expression(config[CONF_IN2_PIN])
