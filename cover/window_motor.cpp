@@ -176,6 +176,10 @@ bool WindowMotorClass::setup_pins() {
     this->in1_pin_->pin_mode(gpio::FLAG_OUTPUT);
     this->in2_pin_->setup();
     this->in2_pin_->pin_mode(gpio::FLAG_OUTPUT);
+    this->enca_pin_->setup();
+    this->enca_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLDOWN);
+    this->encb_pin_->setup();
+    this->encb_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLDOWN);
 
     return FUNC_OK;
 }
@@ -223,8 +227,8 @@ void WindowMotorClass::setEstPosition(float pos) {
    this->ui->est_position_Sensor->publish_state(pos);
 }
 
-#define PWM_MAX 0.5f
-#define PWM_STEP 0.1f
+#define PWM_MAX 0.9f
+#define PWM_STEP 0.05f
 void WindowMotorClass::runPwm() {
    if (this->duty < PWM_MAX) {
       this->duty += 0.1f;
@@ -336,10 +340,10 @@ void WindowMotorClass::pollMotorMove() {
    float est = this->ui->est_position_Sensor->get_state();
    if (!isEqual(tar, est, 0.99f)) {
       this->setMotorStatus(this->statusMask);
-      ESP_LOGI(TAG, " %c all_motor_status=0x%04x &stsmsk=0x%04x",
-            (this->whichMotor==MOTOR_A) ? 'A' : 'B', 
-            (int)(this->ui->all_motor_status_Number->state), 
-            (int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1));
+      float current_a;
+      this->getCurrent(&current_a);
+      ESP_LOGI(TAG, " %c current=%2.2f",
+            (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a);
       if (0 == ((int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1))) {
          // No other motors below me have work to do, so it's ok for me to do work.
          ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
@@ -369,8 +373,6 @@ void WindowMotorClass::child_sync_update() {
    // Called at WindowMotorClass polling rate
    float bus_voltage_v;
    this->getBusVoltage(&bus_voltage_v);
-   float current_a;
-   this->getCurrent(&current_a);
    // ESP_LOGI(TAG, " %c current=%2.2fA pwm=%p",
    //        (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, this->ui->pwm_FloatOutput);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);

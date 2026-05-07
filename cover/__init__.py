@@ -41,7 +41,6 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_WHICH_MOTOR): cv.enum(MOTOR_ENUMS, upper=True, space="_"),
         cv.Required(CONF_ENCA_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_ENCB_PIN): pins.gpio_input_pin_schema,
-        # cv.Required(CONF_PWM_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_IN1_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_IN2_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_INA219_ADDRESS): cv.i2c_address,
