@@ -127,6 +127,7 @@ bool WindowMotorClass::getCurrent(float *current_a) {
     uint16_t raw_current;
     if (!this->ina219.read_byte_16(INA219_REGISTER_CURRENT, &raw_current)) {
       //this->ina219.status_set_warning();
+      this->setFault(MOTFAULT_INA219_READ);
       return FUNC_FAIL;
     }
     *current_a = int16_t(raw_current) * (this->calibration_lsb_ / 1000.0f) / 1000.0f;
@@ -167,11 +168,26 @@ void WindowMotorClass::controlAllMotorStatus(float value) {
 void WindowMotorClass::encoderListener(int32_t stepval) {
    // micros() returns usec since reset.  It will roll over ~ every 71 minutes.
    uint32_t now = micros();
-   if (this->encoderLastCallback_us != INVALID_ENCODER_LAST_CALLBACK_US) {
-      this->encoderSpeed_stepspers = ((float)(stepval) - this->encoderLastCounter) / ((float)(now - this->encoderLastCallback_us) / 1000000);
+   if ((this->motmode == MOTMODE_STOP) || 
+       (this->motmode == MOTMODE_SHORTBRAKE) || 
+       (this->encoderLastCallback_us == INVALID_ENCODER_LAST_CALLBACK_US)) {
+      this->encoderSpeed_stepspers = 0.0f;
+   } else {
+      this->encoderSpeed_stepspers = ((float)(stepval) - this->encoderLastCounter) / 
+         ((float)(now - this->encoderLastCallback_us) / 1000000);
+   }
+   if (stepval > this->encoderCounterAtOpen) {
+      this->encoderCounterAtOpen = stepval;
+   }
+   if (stepval < this->encoderCounterAtClosed) {
+      this->encoderCounterAtClosed = stepval;
    }
    this->encoderLastCounter = stepval;
-   this->encoderLastCallback_us = now;
+   if ((this->motmode == MOTMODE_STOP) || (this->motmode == MOTMODE_SHORTBRAKE)) {
+      this->encoderLastCallback_us = INVALID_ENCODER_LAST_CALLBACK_US;
+   } else {
+      this->encoderLastCallback_us = now;
+   }
 }
 
 //
@@ -196,6 +212,7 @@ bool WindowMotorClass::setup_pins() {
 }
 
 void WindowMotorClass::setMotorDriverMode(MotorDriverModeEnum mode) {
+   this->motmode = mode;
    switch(mode) {
       case MOTMODE_CW:
          this->in1_pin_->digital_write(true);
@@ -351,6 +368,7 @@ void WindowMotorClass::dump_config() {
 
 }
 
+#define EST_POS_STEP 1.0f
 void WindowMotorClass::pollMotorMove() {
    float tar = this->ui->target_position_Number->state;
    float est = this->ui->est_position_Sensor->get_state();
@@ -367,12 +385,12 @@ void WindowMotorClass::pollMotorMove() {
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, tar, est, this->encoderSpeed_stepspers, this->encoderLastCounter);
          if (tar < est) {
             this->setMotorDriverMode(MOTMODE_CW);
-               this->runPwm();
-            est = est - std::min(5.0f, est - tar);
+            this->runPwm();
+            est = est - std::min(EST_POS_STEP, est - tar);
          } else {
             this->setMotorDriverMode(MOTMODE_CCW);
             this->runPwm();
-            est = est + std::min(5.0f, tar - est);
+            est = est + std::min(EST_POS_STEP, tar - est);
          }
          est = clamp(est, 0.0f, 100.0f);
          this->setEstPosition(est);
@@ -390,7 +408,7 @@ void WindowMotorClass::child_sync_update() {
    // Called at WindowMotorClass polling rate
    float bus_voltage_v;
    this->getBusVoltage(&bus_voltage_v);
-   ESP_LOGI(TAG, " %c bigI=%2.2fA",
+   ESP_LOGI(TAG, " %c bigI=%2.3fA",
           (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->largest_current_ever_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
 }

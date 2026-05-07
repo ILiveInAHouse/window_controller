@@ -17,6 +17,7 @@ namespace window_controller {
 
 #define MOTFAULT_INA219_INIT 0x1
 #define MOTFAULT_PIN_INIT 0x2
+#define MOTFAULT_INA219_READ 0x4
 
 enum MotorDriverModeEnum { MOTMODE_CW = 0, MOTMODE_CCW = 1, MOTMODE_SHORTBRAKE = 2, MOTMODE_STOP=3 };
 
@@ -78,6 +79,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       // InternalGPIOPin *encb_pin_{nullptr};
       InternalGPIOPin *in1_pin_{nullptr};
       InternalGPIOPin *in2_pin_{nullptr};
+      MotorDriverModeEnum motmode={MOTMODE_STOP};
       // Encoder 
       int32_t encoderLastCounter={0};
       int32_t encoderCounterAtClosed={0};
