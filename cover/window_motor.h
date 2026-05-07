@@ -49,7 +49,8 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void setFault(uint32_t fault_bit);
       void setMotorStatus(uint16_t sts);
       void setEstPosition(float pos);
-      void setPwm(float duty);
+      void runPwm();
+      void stopMotor();
       void calcWinNumAndStsMsk();
       void setWhichMotor(WhichMotorEnum whichMotor_) {this->whichMotor = whichMotor_;}
       WhichMotorEnum getWhichMotor() {return this->whichMotor;}
@@ -84,6 +85,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       uint32_t calibration_lsb_;
 
       bool shutdownImminent{false};
+      float duty{0.0f};
 };
 
 } // namespace window_controller

@@ -223,9 +223,21 @@ void WindowMotorClass::setEstPosition(float pos) {
    this->ui->est_position_Sensor->publish_state(pos);
 }
 
-void WindowMotorClass::setPwm(float duty) {
-   this->ui->pwm_FloatOutput->set_level(duty);
-   ESP_LOGI(TAG, " which=%c pwm=%p duty=%1.2f", (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->ui->pwm_FloatOutput, duty);
+#define PWM_MAX 0.5f
+#define PWM_STEP 0.1f
+void WindowMotorClass::runPwm() {
+   if (this->duty < PWM_MAX) {
+      this->duty += 0.1f;
+      this->duty = clamp(this->duty, 0.0f, PWM_MAX);
+   }
+   this->ui->pwm_FloatOutput->set_level(this->duty);
+   ESP_LOGI(TAG, " which=%c duty=%1.2f", (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->duty);
+}
+
+void WindowMotorClass::stopMotor() {
+   this->setMotorDriverMode(MOTMODE_STOP);
+   this->ui->pwm_FloatOutput->set_level(0.0f);
+   this->duty = 0.0f;
 }
 
 void WindowMotorClass::setup() {
@@ -233,6 +245,7 @@ void WindowMotorClass::setup() {
 }
 
 void WindowMotorClass::update() {
+   this->pollMotorMove();
 }
 
 void WindowMotorClass::calcWinNumAndStsMsk() {
@@ -272,7 +285,7 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->setFault(0x0);
    this->setMotorStatus(0x0);
    this->setEstPosition(0.0f);
-   //this->setPwm(0.0f);
+   this->stopMotor();
 
    // Set up i2c
    if (FUNC_FAIL == this->calcINA219config()) {
@@ -333,18 +346,17 @@ void WindowMotorClass::pollMotorMove() {
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
          if (tar < est) {
             this->setMotorDriverMode(MOTMODE_CW);
-               this->setPwm(0.5f);
+               this->runPwm();
             est = est - std::min(5.0f, est - tar);
          } else {
             this->setMotorDriverMode(MOTMODE_CCW);
-            this->setPwm(0.5f);
+            this->runPwm();
             est = est + std::min(5.0f, tar - est);
          }
          est = clamp(est, 0.0f, 100.0f);
          this->setEstPosition(est);
          if (isEqual(tar, est, 0.99f)) {
-            this->setPwm(0.0f);
-            this->setMotorDriverMode(MOTMODE_STOP);
+            this->stopMotor();
             this->setMotorStatus(0);
          }
       } // check all_motor_status
@@ -362,7 +374,6 @@ void WindowMotorClass::child_sync_update() {
    // ESP_LOGI(TAG, " %c current=%2.2fA pwm=%p",
    //        (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, this->ui->pwm_FloatOutput);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
-   this->pollMotorMove();
 }
 
 void WindowMotorClass::on_safe_shutdown() {
