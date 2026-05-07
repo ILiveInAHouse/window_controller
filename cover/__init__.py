@@ -46,7 +46,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_INA219_ADDRESS): cv.i2c_address,
     }
 )
-CONFIG_SCHEMA = CONFIG_SCHEMA.extend(cv.polling_component_schema("500ms"))
+CONFIG_SCHEMA = CONFIG_SCHEMA.extend(cv.polling_component_schema("50ms"))
 CONFIG_SCHEMA = CONFIG_SCHEMA.extend(WINDOWCONTROLLER_CLIENT_SCHEMA)
 CONFIG_SCHEMA = CONFIG_SCHEMA.extend(i2c.i2c_device_schema(None))
 

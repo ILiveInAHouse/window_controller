@@ -13,6 +13,8 @@
 namespace esphome {
 namespace window_controller {
 
+#define INVALID_ENCODER_LAST_CALLBACK_US (uint32_t)(0xfffffffff)
+
 #define MOTFAULT_INA219_INIT 0x1
 #define MOTFAULT_PIN_INIT 0x2
 
@@ -38,9 +40,11 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       bool getCurrent(float *current_a);
       bool getShuntVoltage(float *shunt_voltage_mv);
 
-      // Controls
+      // Control Callbacks
       void controlTargetPosition(float value);
       void controlAllMotorStatus(float value);
+      // Encoder Callback
+      void encoderListener(int32_t val);
 
       // Pin Control
       bool setup_pins();
@@ -74,12 +78,20 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       // InternalGPIOPin *encb_pin_{nullptr};
       InternalGPIOPin *in1_pin_{nullptr};
       InternalGPIOPin *in2_pin_{nullptr};
+      // Encoder 
+      int32_t encoderLastCounter={0};
+      int32_t encoderCounterAtClosed={0};
+      int32_t encoderCounterAtOpen={1000};
+      uint32_t encoderLastCallback_us={INVALID_ENCODER_LAST_CALLBACK_US};
+      float encoderSpeed_stepspers={0.0f}; // steps per second
 
-      // ina219 vars
+      // ina219 config vars
       float shunt_resistance_ohm_;
       float max_current_a_;
       float max_voltage_v_;
       uint32_t calibration_lsb_;
+      // ina219 monitor vars
+      float largest_current_ever_a={0.0f};
 
       bool shutdownImminent{false};
       float duty{0.0f};

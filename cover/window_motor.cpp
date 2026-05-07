@@ -123,6 +123,7 @@ bool WindowMotorClass::getBusVoltage(float *bus_voltage_v) {
 }
 
 bool WindowMotorClass::getCurrent(float *current_a) {
+   // Saleae says the i2c read takes about 2.268 ms
     uint16_t raw_current;
     if (!this->ina219.read_byte_16(INA219_REGISTER_CURRENT, &raw_current)) {
       //this->ina219.status_set_warning();
@@ -160,6 +161,18 @@ void WindowMotorClass::controlAllMotorStatus(float value) {
    ESP_LOGD("custom", "controlAllMotorStatus=%f which=%d", value, this->whichMotor);
 }
 
+//
+// Encoder callback
+//
+void WindowMotorClass::encoderListener(int32_t stepval) {
+   // micros() returns usec since reset.  It will roll over ~ every 71 minutes.
+   uint32_t now = micros();
+   if (this->encoderLastCallback_us != INVALID_ENCODER_LAST_CALLBACK_US) {
+      this->encoderSpeed_stepspers = ((float)(stepval) - this->encoderLastCounter) / ((float)(now - this->encoderLastCallback_us) / 1000000);
+   }
+   this->encoderLastCounter = stepval;
+   this->encoderLastCallback_us = now;
+}
 
 //
 // Pin control
@@ -240,6 +253,8 @@ void WindowMotorClass::stopMotor() {
    this->setMotorDriverMode(MOTMODE_STOP);
    this->ui->pwm_FloatOutput->set_level(0.0f);
    this->duty = 0.0f;
+   this->encoderLastCallback_us = INVALID_ENCODER_LAST_CALLBACK_US;
+   this->encoderSpeed_stepspers = 0.0f;
 }
 
 void WindowMotorClass::setup() {
@@ -306,6 +321,10 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->ui->all_motor_status_Number->add_on_state_callback([this](float value) {
       this->controlAllMotorStatus(value);
    });
+   // Set up rotary_encoder callback
+   this->ui->enc_RotaryEncoderSensor->register_listener([this](int32_t value) {
+      this->encoderListener(value);
+   });
 
    // Set up pins
    if (this->setup_pins() == FUNC_FAIL) {
@@ -337,14 +356,15 @@ void WindowMotorClass::pollMotorMove() {
    float est = this->ui->est_position_Sensor->get_state();
    if (!isEqual(tar, est, 0.99f)) {
       this->setMotorStatus(this->statusMask);
-      float current_a;
-      this->getCurrent(&current_a);
-      ESP_LOGI(TAG, " %c current=%2.2f",
-            (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a);
       if (0 == ((int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1))) {
          // No other motors below me have work to do, so it's ok for me to do work.
-         ESP_LOGI(TAG, " %c target_pos=%3.2f est_pos=%3.2f",
-            (this->whichMotor==MOTOR_A) ? 'A' : 'B', tar, est);
+         float current_a;
+         this->getCurrent(&current_a);
+         if (current_a > this->largest_current_ever_a) {
+            this->largest_current_ever_a = current_a;
+         }
+         ESP_LOGI(TAG, " %c current=%2.2f target_pos=%3.2f est_pos=%3.2f speed=%3.4f enc=%d",
+            (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, tar, est, this->encoderSpeed_stepspers, this->encoderLastCounter);
          if (tar < est) {
             this->setMotorDriverMode(MOTMODE_CW);
                this->runPwm();
@@ -370,8 +390,8 @@ void WindowMotorClass::child_sync_update() {
    // Called at WindowMotorClass polling rate
    float bus_voltage_v;
    this->getBusVoltage(&bus_voltage_v);
-   // ESP_LOGI(TAG, " %c current=%2.2fA pwm=%p",
-   //        (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, this->ui->pwm_FloatOutput);
+   ESP_LOGI(TAG, " %c bigI=%2.2fA",
+          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->largest_current_ever_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
 }
 
