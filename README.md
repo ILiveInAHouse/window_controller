@@ -23,6 +23,16 @@ external_components:
       type: local
       path: ../components
 
+window_controller:
+  boardid0_pin: GPIO18
+  boardid1_pin: GPIO43
+  boardid2_pin: GPIO33
+  id: window_controller_hub_id
+  motor_a_pwm: motor_a_pwm_id
+  motor_b_pwm: motor_b_pwm_id
+  motor_a_enc: motor_a_enc_id
+  motor_b_enc: motor_b_enc_id
+
 output:
   - platform: ledc
     pin: GPIO5
@@ -32,14 +42,6 @@ output:
     pin: GPIO6
     id: motor_b_pwm_id
     frequency: 1000Hz
-
-window_controller:
-  boardid0_pin: GPIO18
-  boardid1_pin: GPIO43
-  boardid2_pin: GPIO33
-  id: window_controller_hub_id
-  motor_a_pwm: motor_a_pwm_id
-  motor_b_pwm: motor_b_pwm_id
 
 sensor:
   - platform: window_controller
@@ -72,14 +74,24 @@ sensor:
     est_position:
       device_id: motor_B_device
       name: "Est Position"
+  - platform: rotary_encoder
+    name: "RotaryEncA"
+    pin_a: GPIO14
+    pin_b: GPIO4
+    id: motor_a_enc_id
+  - platform: rotary_encoder
+    name: "RotaryEncB"
+    pin_a: GPIO17
+    pin_b: GPIO7
+    id: motor_b_enc_id
 
 cover:
   - platform: window_controller
     window_controller_id: window_controller_hub_id
     # device_class: window
     which_motor: MOTOR_A
-    enca_pin: GPIO14
-    encb_pin: GPIO4
+    # enca_pin: GPIO14
+    # encb_pin: GPIO4
     in1_pin: GPIO35
     in2_pin: GPIO36
     ina219_address: 0x40
@@ -88,8 +100,8 @@ cover:
     window_controller_id: window_controller_hub_id
     # device_class: window
     which_motor: MOTOR_B
-    enca_pin: GPIO17
-    encb_pin: GPIO7
+    # enca_pin: GPIO17
+    # encb_pin: GPIO7
     in1_pin: GPIO37
     in2_pin: GPIO38
     ina219_address: 0x41

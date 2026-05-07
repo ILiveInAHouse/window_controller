@@ -165,9 +165,7 @@ void WindowMotorClass::controlAllMotorStatus(float value) {
 // Pin control
 //
 bool WindowMotorClass::setup_pins() {
-   if ((this->enca_pin_ == nullptr) || 
-       (this->encb_pin_ == nullptr) || 
-       (this->in1_pin_ == nullptr) || 
+   if ((this->in1_pin_ == nullptr) || 
        (this->in2_pin_ == nullptr)) {
       return FUNC_FAIL;
     }
@@ -176,10 +174,10 @@ bool WindowMotorClass::setup_pins() {
     this->in1_pin_->pin_mode(gpio::FLAG_OUTPUT);
     this->in2_pin_->setup();
     this->in2_pin_->pin_mode(gpio::FLAG_OUTPUT);
-    this->enca_pin_->setup();
-    this->enca_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLDOWN);
-    this->encb_pin_->setup();
-    this->encb_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLDOWN);
+   //  this->enca_pin_->setup();
+   //  this->enca_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLDOWN);
+   //  this->encb_pin_->setup();
+   //  this->encb_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLDOWN);
 
     return FUNC_OK;
 }
@@ -327,9 +325,8 @@ void WindowMotorClass::child_publish_info() {
 //   to monitor logs
 void WindowMotorClass::dump_config() {
     LOG_I2C_DEVICE(this);
-    LOG_PIN("  enca_pin: ", this->enca_pin_);
-    LOG_PIN("  encb_pin: ", this->encb_pin_);
-   //  LOG_PIN("  pwm_pin: ", this->pwm_pin_);
+   //  LOG_PIN("  enca_pin: ", this->enca_pin_);
+   //  LOG_PIN("  encb_pin: ", this->encb_pin_);
     LOG_PIN("  in1_pin: ", this->in1_pin_);
     LOG_PIN("  in2_pin: ", this->in2_pin_);
 

@@ -58,12 +58,10 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void child_publish_info();
       void child_sync_update();
       WCMotorUI *ui;
-      void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
-      void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
-      void set_pwm_pin(output::FloatOutput *pin) {pwm_pin_ = pin;}
+      // void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
+      // void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
       void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
       void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
-      WindowMotorClass(output::FloatOutput *pwm_pin) : pwm_pin_(pwm_pin) {}
 
 
    protected:
@@ -72,9 +70,8 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       uint8_t windowNumber;
       WhichMotorEnum whichMotor;
       uint16_t statusMask;
-      InternalGPIOPin *enca_pin_{nullptr};
-      InternalGPIOPin *encb_pin_{nullptr};
-      output::FloatOutput *pwm_pin_{nullptr};
+      // InternalGPIOPin *enca_pin_{nullptr};
+      // InternalGPIOPin *encb_pin_{nullptr};
       InternalGPIOPin *in1_pin_{nullptr};
       InternalGPIOPin *in2_pin_{nullptr};
 

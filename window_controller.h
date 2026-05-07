@@ -5,6 +5,8 @@
 #include "window_controller_child.h"
 #include "esphome/components/number/number.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/output/float_output.h"
+#include "esphome/components/rotary_encoder/rotary_encoder.h"
 #include "wc_number.h"
 #include "wc_whichmotor.h"
 #include "wc_sensor.h"
@@ -170,6 +172,13 @@ class WindowControllerHub : public PollingComponent {
     }
     void set_pwm_b(output::FloatOutput *pwm) {
       this->motuiB.pwm_FloatOutput = pwm;
+    }
+
+    void set_enc_a(rotary_encoder::RotaryEncoderSensor *e) {
+      this->motuiA.enc_RotaryEncoderSensor = e;
+    }
+    void set_enc_b(rotary_encoder::RotaryEncoderSensor *e) {
+      this->motuiB.enc_RotaryEncoderSensor = e;
     }
 
   protected:

@@ -4,6 +4,7 @@
 #include "wc_sensor.h"
 #include "wc_whichmotor.h"
 #include "esphome/components/output/float_output.h"
+#include "esphome/components/rotary_encoder/rotary_encoder.h"
 
 // Namespace definition
 namespace esphome::window_controller {
@@ -21,6 +22,7 @@ public:
    WCSensor *est_position_Sensor{nullptr};
    WCSensor *uptime_Sensor{nullptr};
    output::FloatOutput *pwm_FloatOutput{nullptr};
+   rotary_encoder::RotaryEncoderSensor *enc_RotaryEncoderSensor{nullptr};
    uint8_t boardId;
    float numRotationsToFullOpen;
    float currentRotationIndex;
