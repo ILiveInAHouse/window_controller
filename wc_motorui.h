@@ -9,6 +9,9 @@
 // Namespace definition
 namespace esphome::window_controller {
 
+// Forward declare WindowControllerHub
+class WindowControllerHub;
+
 // Store pointers to all the UI controls and sensors that the WindowMotorClass uses.
 // Also put config info from the hub for the WindowMotorClasses to use.
 class WCMotorUI {
@@ -31,6 +34,8 @@ public:
    float rpm;
    WhichMotorEnum getWhichMotor() {return this->whichMotor;}
    void setWhichMotor(WhichMotorEnum w) {this->whichMotor = w;}
+   WindowControllerHub *parent;
+   uint16_t co_motor_status={0}; // work pending status of other motors on this controller
 
 protected:
    WhichMotorEnum whichMotor{MOTOR_NONE};

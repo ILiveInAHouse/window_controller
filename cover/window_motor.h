@@ -67,7 +67,8 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       // void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
       void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
       void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
-
+      bool my_turn_to_move();
+      
 
    protected:
       uint32_t faults{0};

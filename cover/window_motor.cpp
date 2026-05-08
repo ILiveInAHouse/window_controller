@@ -357,6 +357,31 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
 void WindowMotorClass::child_publish_info() {
 }
 
+bool WindowMotorClass::my_turn_to_move() {
+   // if no window_number less than mine have work to do, then
+   //   it's ok for me to move my window
+   // motor status is a bit mask.  each window has a bit in order:
+   // 0x0001 (all windows stop)
+   // 0x0002 (window 1)
+   // 0x0004 (window 2)
+   // 0x0008 (window 5)
+   // 0x0010 (window 6)
+   // 0x0020 (window 9)
+   // 0x0040 (window 10)
+   // 0x0080 (window 11)
+   // 0x0100 (window 12)
+   // 0x0200 (window 13)
+   // 0x0400 (window 14)
+   // all_motor_status comes from Hass
+   if (((int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1)) > 0) {
+      return false;
+   }
+   if ((this->ui->co_motor_status & (this->statusMask-1)) > 0) {
+      return false;
+   }
+   return true;
+}
+
 // Called once after booting and then each time a new client connects
 //   to monitor logs
 void WindowMotorClass::dump_config() {
@@ -374,7 +399,8 @@ void WindowMotorClass::pollMotorMove() {
    float est = this->ui->est_position_Sensor->get_state();
    if (!isEqual(tar, est, 0.99f)) {
       this->setMotorStatus(this->statusMask);
-      if (0 == ((int)(this->ui->all_motor_status_Number->state) & (this->statusMask-1))) {
+      this->ui->parent->set_co_motor_status_mask(this->statusMask);
+      if (this->my_turn_to_move()) {
          // No other motors below me have work to do, so it's ok for me to do work.
          float current_a;
          this->getCurrent(&current_a);
@@ -397,8 +423,12 @@ void WindowMotorClass::pollMotorMove() {
          if (isEqual(tar, est, 0.99f)) {
             this->stopMotor();
             this->setMotorStatus(0);
+            this->ui->parent->clear_co_motor_status_mask(this->statusMask);
          }
-      } // check all_motor_status
+      } else {
+         // another lower motor has work to do so stop my motor
+         this->stopMotor();
+      }
    } // if !eq(tar,est)
 }
 

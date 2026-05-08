@@ -55,16 +55,30 @@ void WindowControllerHub::setup() {
     // each component type's device_id specified in the .yaml is a new child
     for (auto *child : this->children_) {
         if (child->getWhichMotor() == MOTOR_A) {
+            this->motuiA.parent = this;
             this->motuiA.boardId = this->boardId;
             child->child_setup(&this->motuiA);
         }
         if (child->getWhichMotor() == MOTOR_B) {
+            this->motuiB.parent = this;
             this->motuiB.boardId = this->boardId;
             child->child_setup(&this->motuiB);
         }
     }
 
     // delay(1);
+}
+
+void WindowControllerHub::set_co_motor_status_mask(uint16_t mask) {
+    this->co_motor_status |= mask;
+    this->motuiA.co_motor_status = this->co_motor_status;
+    this->motuiB.co_motor_status = this->co_motor_status;
+}
+
+void WindowControllerHub::clear_co_motor_status_mask(uint16_t mask) {
+    this->co_motor_status &= ~mask;
+    this->motuiA.co_motor_status = this->co_motor_status;
+    this->motuiB.co_motor_status = this->co_motor_status;
 }
 
 //void ExampleComponent::loop() {

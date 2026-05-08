@@ -55,6 +55,8 @@ class WindowControllerHub : public PollingComponent {
     void set_boardid0_pin(InternalGPIOPin *pin) {boardid0_pin_ = pin;}
     void set_boardid1_pin(InternalGPIOPin *pin) {boardid1_pin_ = pin;}
     void set_boardid2_pin(InternalGPIOPin *pin) {boardid2_pin_ = pin;}
+    void set_co_motor_status_mask(uint16_t mask);
+    void clear_co_motor_status_mask(uint16_t mask);
 
     WCMotorUI motuiA;
     WCMotorUI motuiB;
@@ -194,6 +196,7 @@ class WindowControllerHub : public PollingComponent {
     uint8_t boardId{0};
     uint32_t faults{0};
     bool shutdownImminent{false};
+    uint16_t co_motor_status{0};
 
 };
 
