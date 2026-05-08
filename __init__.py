@@ -1,6 +1,6 @@
 import esphome.config_validation as cv
 from esphome import pins
-from esphome.components import i2c, output, rotary_encoder
+from esphome.components import output, rotary_encoder
 import esphome.codegen as cg
 from esphome.const import (
     CONF_ID,
@@ -8,7 +8,7 @@ from esphome.const import (
 )
 
 CODEOWNERS = ["@ILiveInAHouse"]
-DEPENDENCIES = ["i2c"]
+DEPENDENCIES = []
 AUTO_LOAD = [ ]
 
 CONF_WINDOWCONTROLLER_ID = "window_controller_id"
@@ -26,7 +26,7 @@ CONF_MOTOR_B_ENC = "motor_b_enc"
 window_controller_ns = cg.esphome_ns.namespace("window_controller")
 # Create class and inherit from
 # also look at uart.UARTDevice as an example
-WindowControllerHub = window_controller_ns.class_("WindowControllerHub", cg.PollingComponent, i2c.I2CDevice)
+WindowControllerHub = window_controller_ns.class_("WindowControllerHub", cg.PollingComponent)
 
 # Look at Parent Hub and Child components
 # Look at cv.use_id

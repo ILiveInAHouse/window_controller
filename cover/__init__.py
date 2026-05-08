@@ -11,7 +11,7 @@ from esphome.const import (
 from .. import WINDOWCONTROLLER_CLIENT_SCHEMA, window_controller_ns, register_windowcontroller_child
 
 AUTO_LOAD = []
-DEPENDENCIES = ["window_controller"]
+DEPENDENCIES = ["window_controller", "i2c"]
 
 CONF_WINDOW_NUMBER = "window_number"
 CONF_FAULTS = "faults"
@@ -24,7 +24,7 @@ CONF_IN2_PIN = "in2_pin"
 CONF_INA219_ADDRESS = "ina219_address"
 
 WindowMotorClass = window_controller_ns.class_(
-    "WindowMotorClass", cg.PollingComponent
+    "WindowMotorClass", cg.PollingComponent, i2c.I2CDevice
 )
 
 WhichMotor = window_controller_ns.enum("WhichMotorEnum")
