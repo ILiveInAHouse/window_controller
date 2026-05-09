@@ -419,8 +419,13 @@ void WindowMotorClass::pollMotorMove() {
             est = est + std::min(EST_POS_STEP, tar - est);
          }
          est = clamp(est, 0.0f, 100.0f);
+         if (current_a > 0.4f) {
+            // possibly at the end of our journey
+            ESP_LOGI(TAG, "max current hit %2.3f", current_a);
+            est = tar;
+         }
          this->setEstPosition(est);
-         if (isEqual(tar, est, 0.99f)) {
+         if (isEqual(tar, est, 0.02f)) {
             this->stopMotor();
             this->setMotorStatus(0);
             this->ui->parent->clear_co_motor_status_mask(this->statusMask);
@@ -438,7 +443,7 @@ void WindowMotorClass::child_sync_update() {
    // Called at WindowMotorClass polling rate
    float bus_voltage_v;
    this->getBusVoltage(&bus_voltage_v);
-   ESP_LOGI(TAG, " %c bigI=%2.3fA",
+   ESP_LOGI(TAG, " %c biggestI=%2.3fA",
           (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->largest_current_ever_a);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
 }
