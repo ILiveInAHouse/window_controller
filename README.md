@@ -79,11 +79,16 @@ sensor:
     pin_a: GPIO14
     pin_b: GPIO4
     id: motor_a_enc_id
+    publish_initial_value: true
+    # ALWAYS_ZERO or RESTORE_DEFAULT_ZERO
+    restore_mode: ALWAYS_ZERO
   - platform: rotary_encoder
     name: "RotaryEncB"
     pin_a: GPIO17
     pin_b: GPIO7
     id: motor_b_enc_id
+    publish_initial_value: true
+    restore_mode: ALWAYS_ZERO
 
 cover:
   - platform: window_controller

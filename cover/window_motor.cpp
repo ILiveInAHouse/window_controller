@@ -233,6 +233,21 @@ void WindowMotorClass::setMotorDriverMode(MotorDriverModeEnum mode) {
    }
 }
 
+void WindowMotorClass::setWindowDirection(WindowDirectionEnum dir) {
+   this->windir = dir;
+   switch(dir) {
+      case WINDIR_OPEN:
+         this->setMotorDriverMode(MOTMODE_CW);
+         break;
+      case WINDIR_CLOSE:
+         this->setMotorDriverMode(MOTMODE_CCW);
+         break;
+      case WINDIR_STOP:
+         this->setMotorDriverMode(MOTMODE_STOP);
+         break;
+   }
+}
+
 //
 // Class functions
 //
@@ -267,7 +282,7 @@ void WindowMotorClass::runPwm() {
 }
 
 void WindowMotorClass::stopMotor() {
-   this->setMotorDriverMode(MOTMODE_STOP);
+   this->setWindowDirection(WINDIR_STOP);
    this->ui->pwm_FloatOutput->set_level(0.0f);
    this->duty = 0.0f;
    this->encoderLastCallback_us = INVALID_ENCODER_LAST_CALLBACK_US;
@@ -310,6 +325,7 @@ void WindowMotorClass::calcWinNumAndStsMsk() {
     this->statusMask = 2 << (((this->ui->boardId * 2) + ((this->whichMotor == MOTOR_A) ? 0 : 1)));
 }
 
+#define DEFAULT_MAX_TORQUE 0.5f
 void WindowMotorClass::child_setup(WCMotorUI *ui) {
    if (ui == nullptr) {
       this->mark_failed();
@@ -321,6 +337,7 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->setEstPosition(0.0f);
    this->stopMotor();
 
+   this->ui->max_torque_Number->publish_state(DEFAULT_MAX_TORQUE);
    // Set up i2c
    if (FUNC_FAIL == this->calcINA219config()) {
       this->setFault(MOTFAULT_INA219_INIT);
@@ -350,7 +367,7 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
       return;
    }
 
-   this->setMotorDriverMode(MOTMODE_STOP);
+   this->setWindowDirection(WINDIR_STOP);
 
 }
 
@@ -410,16 +427,16 @@ void WindowMotorClass::pollMotorMove() {
          ESP_LOGI(TAG, " %c current=%2.2f target_pos=%3.2f est_pos=%3.2f speed=%3.4f enc=%d",
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, tar, est, this->encoderSpeed_stepspers, this->encoderLastCounter);
          if (tar < est) {
-            this->setMotorDriverMode(MOTMODE_CW);
+            this->setWindowDirection(WINDIR_CLOSE);
             this->runPwm();
             est = est - std::min(EST_POS_STEP, est - tar);
          } else {
-            this->setMotorDriverMode(MOTMODE_CCW);
+            this->setWindowDirection(WINDIR_OPEN);
             this->runPwm();
             est = est + std::min(EST_POS_STEP, tar - est);
          }
          est = clamp(est, 0.0f, 100.0f);
-         if (current_a > 0.4f) {
+         if (current_a > this->ui->max_torque_Number->state) {
             // possibly at the end of our journey
             ESP_LOGI(TAG, "max current hit %2.3f", current_a);
             est = tar;

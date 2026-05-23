@@ -19,7 +19,9 @@ namespace window_controller {
 #define MOTFAULT_PIN_INIT 0x2
 #define MOTFAULT_INA219_READ 0x4
 
-enum MotorDriverModeEnum { MOTMODE_CW = 0, MOTMODE_CCW = 1, MOTMODE_SHORTBRAKE = 2, MOTMODE_STOP=3 };
+enum MotorDriverModeEnum { MOTMODE_CW=0, MOTMODE_CCW=1, MOTMODE_SHORTBRAKE=2, MOTMODE_STOP=3 };
+enum WindowDirectionEnum { WINDIR_OPEN=0, WINDIR_CLOSE=1, WINDIR_STOP=2 };
+enum WindowStateEnum { UNINITIALIZED=0, INIT_TRY_OPEN=1, INIT_TRY_CLOSE=2, IS_OPEN=3, IS_CLOSED=4, IS_BETWEEN=5 };
 
 class WindowMotorClass : public WindowControllerClient, public PollingComponent, public i2c::I2CDevice {
    public:
@@ -71,16 +73,18 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       
 
    protected:
-      uint32_t faults{0};
+      uint32_t faults={0};
       WCNumber *targetPosition;
       uint8_t windowNumber;
       WhichMotorEnum whichMotor;
       uint16_t statusMask;
       // InternalGPIOPin *enca_pin_{nullptr};
       // InternalGPIOPin *encb_pin_{nullptr};
-      InternalGPIOPin *in1_pin_{nullptr};
-      InternalGPIOPin *in2_pin_{nullptr};
+      InternalGPIOPin *in1_pin_={nullptr};
+      InternalGPIOPin *in2_pin_={nullptr};
       MotorDriverModeEnum motmode={MOTMODE_STOP};
+      void setWindowDirection(WindowDirectionEnum dir);
+      WindowDirectionEnum windir={WINDIR_STOP};
       // Encoder 
       int32_t encoderLastCounter={0};
       int32_t encoderCounterAtClosed={0};
@@ -96,8 +100,11 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       // ina219 monitor vars
       float largest_current_ever_a={0.0f};
 
-      bool shutdownImminent{false};
-      float duty{0.0f};
+      bool shutdownImminent={false};
+      float duty={0.0f};
+      WindowStateEnum winstate={UNINITIALIZED};
+      bool initTryOpenSuccess={false};
+      bool initTryCloseSuccess={false};
 };
 
 } // namespace window_controller

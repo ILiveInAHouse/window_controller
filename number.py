@@ -47,7 +47,7 @@ async def to_code(config):
         cg.add(var.set_which_motor(target_position_conf[CONF_WHICH_MOTOR]))
         cg.add(parent.set_target_position(var))
     if max_torque_conf := config.get(CONF_MAX_TORQUE):
-        var = await number.new_number(max_torque_conf, min_value=0, max_value=100, step=1)
+        var = await number.new_number(max_torque_conf, min_value=0, max_value=2, step=0.1)
         cg.add(var.set_which_motor(max_torque_conf[CONF_WHICH_MOTOR]))
         cg.add(parent.set_max_torque(var))
     if all_motor_status_conf := config.get(CONF_ALL_MOTOR_STATUS):
