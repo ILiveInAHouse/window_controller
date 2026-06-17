@@ -273,7 +273,7 @@ void WindowMotorClass::setEstPosition(float pos) {
 }
 
 #define PWM_MAX 1.0f
-#define PWM_STEP 1.0f
+#define PWM_STEP 2.0f
 void WindowMotorClass::runPwm() {
    if (this->duty < PWM_MAX) {
       this->duty += PWM_STEP;
@@ -327,7 +327,8 @@ void WindowMotorClass::calcWinNumAndStsMsk() {
     this->statusMask = 2 << (((this->ui->boardId * 2) + ((this->whichMotor == MOTOR_A) ? 0 : 1)));
 }
 
-#define DEFAULT_MAX_TORQUE 0.5f
+#define DEFAULT_MAX_TORQUE 1.2f
+#define DEFAULT_TARGET_POSITION 50.0f
 void WindowMotorClass::child_setup(WCMotorUI *ui) {
    if (ui == nullptr) {
       this->mark_failed();
@@ -336,10 +337,11 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
    this->ui = ui;
    this->setFault(0x0);
    this->setMotorStatus(0x0);
-   this->setEstPosition(0.0f);
+   this->setEstPosition(DEFAULT_TARGET_POSITION);
    this->stopMotor();
 
    this->ui->max_torque_Number->publish_state(DEFAULT_MAX_TORQUE);
+   this->ui->target_position_Number->publish_state(DEFAULT_TARGET_POSITION);
    // Set up i2c
    if (FUNC_FAIL == this->calcINA219config()) {
       this->setFault(MOTFAULT_INA219_INIT);
@@ -412,11 +414,18 @@ void WindowMotorClass::dump_config() {
 
 }
 
-#define EST_POS_STEP 1.0f
+bool atTargetPosition(float targetPosition, float currentPosition, float stepsize) {
+   if (fabsf(targetPosition - currentPosition) < stepsize)
+      return true;
+   else
+      return false;
+}
+
+#define EST_POS_STEP 0.1f
 void WindowMotorClass::pollMotorMove() {
    float tar = this->ui->target_position_Number->state;
    float est = this->ui->est_position_Sensor->get_state();
-   if (!isEqual(tar, est, 0.99f)) {
+   if (!atTargetPosition(tar, est, EST_POS_STEP)) {
       this->setMotorStatus(this->statusMask);
       this->ui->parent->set_co_motor_status_mask(this->statusMask);
       if (this->my_turn_to_move()) {
@@ -429,11 +438,11 @@ void WindowMotorClass::pollMotorMove() {
          ESP_LOGI(TAG, " %c current=%2.2f target_pos=%3.2f est_pos=%3.2f speed=%3.4f enc=%d",
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, tar, est, this->encoderSpeed_stepspers, this->encoderLastCounter);
          if (tar < est) {
-            this->setWindowDirection(WINDIR_CLOSE);
+            this->setWindowDirection(WINDIR_OPEN);
             this->runPwm();
             est = est - std::min(EST_POS_STEP, est - tar);
          } else {
-            this->setWindowDirection(WINDIR_OPEN);
+            this->setWindowDirection(WINDIR_CLOSE);
             this->runPwm();
             est = est + std::min(EST_POS_STEP, tar - est);
          }
@@ -444,7 +453,7 @@ void WindowMotorClass::pollMotorMove() {
             est = tar;
          }
          this->setEstPosition(est);
-         if (isEqual(tar, est, 0.02f)) {
+         if (atTargetPosition(tar, est, EST_POS_STEP)) {
             this->stopMotor();
             this->setMotorStatus(0);
             this->ui->parent->clear_co_motor_status_mask(this->statusMask);
