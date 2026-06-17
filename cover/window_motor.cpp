@@ -131,6 +131,8 @@ bool WindowMotorClass::getCurrent(float *current_a) {
       return FUNC_FAIL;
     }
     *current_a = int16_t(raw_current) * (this->calibration_lsb_ / 1000.0f) / 1000.0f;
+    // Current will be negative in one motor direction, positive in the other
+    *current_a = fabsf(*current_a);
     return FUNC_OK;
 }
 
@@ -270,11 +272,11 @@ void WindowMotorClass::setEstPosition(float pos) {
    this->ui->est_position_Sensor->publish_state(pos);
 }
 
-#define PWM_MAX 0.9f
-#define PWM_STEP 0.05f
+#define PWM_MAX 1.0f
+#define PWM_STEP 1.0f
 void WindowMotorClass::runPwm() {
    if (this->duty < PWM_MAX) {
-      this->duty += 0.1f;
+      this->duty += PWM_STEP;
       this->duty = clamp(this->duty, 0.0f, PWM_MAX);
    }
    this->ui->pwm_FloatOutput->set_level(this->duty);
