@@ -156,9 +156,31 @@ bool WindowMotorClass::powerdownINA219() {
 
 //
 // Control callbacks
+// These are only called when the user releases the slider and the value is different
+//   the previous value.
+// Not called on init.
 //
+#define OPEN_MAX_TORQUE 0.4f
+#define CLOSE_MAX_TORQUE 0.9f
+#define BETWEEN_MAX_TORQUE 0.9f
 void WindowMotorClass::controlTargetPosition(float value) {
    ESP_LOGD("custom", "controlTargetPosition=%f which=%d", value, this->whichMotor);
+   if (value == 0.0f) {
+      this->ui->max_torque_Number->publish_state(CLOSE_MAX_TORQUE);
+      this->winstate = WINST_CLOSING;
+   } else if (value == 100.0f) {
+      this->ui->max_torque_Number->publish_state(OPEN_MAX_TORQUE);
+      this->winstate = WINST_OPENING;
+   } else {
+      float estpos = this->estimatedCurrentPosition();
+      // estimatedCurrentPosition returns -1.0f if unknown
+      if (estpos > -0.1f) {
+         this->ui->max_torque_Number->publish_state(BETWEEN_MAX_TORQUE);
+         this->winstate = WINST_BETWEEN_MOVING;
+      }
+      // do nothing if estimatedCurrentPosition is unknown, because
+      //   we have no position to base a move on.
+   }
 }
 void WindowMotorClass::controlAllMotorStatus(float value) {
    ESP_LOGD("custom", "controlAllMotorStatus=%f which=%d", value, this->whichMotor);
@@ -178,18 +200,46 @@ void WindowMotorClass::encoderListener(int32_t stepval) {
       this->encoderSpeed_stepspers = ((float)(stepval) - this->encoderLastCounter) / 
          ((float)(now - this->encoderLastCallback_us) / 1000000);
    }
-   if (stepval > this->encoderCounterAtOpen) {
-      this->encoderCounterAtOpen = stepval;
-   }
-   if (stepval < this->encoderCounterAtClosed) {
-      this->encoderCounterAtClosed = stepval;
-   }
    this->encoderLastCounter = stepval;
    if ((this->motmode == MOTMODE_STOP) || (this->motmode == MOTMODE_SHORTBRAKE)) {
       this->encoderLastCallback_us = INVALID_ENCODER_LAST_CALLBACK_US;
    } else {
       this->encoderLastCallback_us = now;
    }
+}
+
+// Full range found experimentally on Window 14.
+#define PRECALC_FULL_WINDOW_ENCODER_RANGE 266065
+
+// returns -1.0f if estimated current position is not knowable.
+float WindowMotorClass::estimatedCurrentPosition() {
+   // default to unknown/unknowable
+   float estpos = -1.0f;
+   if (this->encoderCounterAtOpen != ENCODER_COUNTER_INIT) {
+      // valid encoderCounterAtOpen - preferred base measure
+      // current position in range
+      estpos = (float)(this->encoderLastCounter) - this->encoderCounterAtOpen;
+      // divide by full range
+      estpos = estpos / PRECALC_FULL_WINDOW_ENCODER_RANGE;
+      // Move from 0.0-1.0 range to 0.0-100.0 range
+      estpos *= 100.0f;
+      estpos = clamp(estpos, 0.0f, 100.0f);
+   } else if (this->encoderCounterAtClosed != ENCODER_COUNTER_INIT) {
+      // valid encoderCounterAtClosed
+      // current position in range
+      estpos = (float)(this->encoderLastCounter) - 
+         (this->encoderCounterAtClosed - 
+            PRECALC_FULL_WINDOW_ENCODER_RANGE);
+      // divide by full range
+      estpos = estpos / PRECALC_FULL_WINDOW_ENCODER_RANGE;
+      // Move from 0.0-1.0 range to 0.0-100.0 range
+      estpos *= 100.0f;
+      estpos = clamp(estpos, 0.0f, 100.0f);
+   } else {
+      // cannot estimate current position because we don't know
+      //   where full open or full closed position is.
+   }
+   return estpos;
 }
 
 //
@@ -239,10 +289,10 @@ void WindowMotorClass::setWindowDirection(WindowDirectionEnum dir) {
    this->windir = dir;
    switch(dir) {
       case WINDIR_OPEN:
-         this->setMotorDriverMode(MOTMODE_CW);
+         this->setMotorDriverMode(MOTMODE_CCW);
          break;
       case WINDIR_CLOSE:
-         this->setMotorDriverMode(MOTMODE_CCW);
+         this->setMotorDriverMode(MOTMODE_CW);
          break;
       case WINDIR_STOP:
          this->setMotorDriverMode(MOTMODE_STOP);
@@ -327,7 +377,7 @@ void WindowMotorClass::calcWinNumAndStsMsk() {
     this->statusMask = 2 << (((this->ui->boardId * 2) + ((this->whichMotor == MOTOR_A) ? 0 : 1)));
 }
 
-#define DEFAULT_MAX_TORQUE 1.2f
+#define DEFAULT_MAX_TORQUE 0.9f
 #define DEFAULT_TARGET_POSITION 50.0f
 void WindowMotorClass::child_setup(WCMotorUI *ui) {
    if (ui == nullptr) {
@@ -421,11 +471,23 @@ bool atTargetPosition(float targetPosition, float currentPosition, float stepsiz
       return false;
 }
 
+bool weHaveMoveWorkToDo(WindowStateEnum winstate) {
+   switch (winstate) {
+      case WINST_BETWEEN_MOVING:
+      case WINST_OPENING:
+      case WINST_CLOSING:
+         return true;
+         break;
+      default: 
+         return false;
+   }
+}
+
 #define EST_POS_STEP 0.1f
 void WindowMotorClass::pollMotorMove() {
    float tar = this->ui->target_position_Number->state;
-   float est = this->ui->est_position_Sensor->get_state();
-   if (!atTargetPosition(tar, est, EST_POS_STEP)) {
+   float est = this->estimatedCurrentPosition();
+   if (weHaveMoveWorkToDo(this->winstate)) {
       this->setMotorStatus(this->statusMask);
       this->ui->parent->set_co_motor_status_mask(this->statusMask);
       if (this->my_turn_to_move()) {
@@ -437,32 +499,75 @@ void WindowMotorClass::pollMotorMove() {
          }
          ESP_LOGI(TAG, " %c current=%2.2f target_pos=%3.2f est_pos=%3.2f speed=%3.4f enc=%d",
             (this->whichMotor==MOTOR_A) ? 'A' : 'B', current_a, tar, est, this->encoderSpeed_stepspers, this->encoderLastCounter);
-         if (tar < est) {
-            this->setWindowDirection(WINDIR_OPEN);
-            this->runPwm();
-            est = est - std::min(EST_POS_STEP, est - tar);
-         } else {
-            this->setWindowDirection(WINDIR_CLOSE);
-            this->runPwm();
-            est = est + std::min(EST_POS_STEP, tar - est);
+         switch (this->winstate) {
+            case WINST_OPENING:
+               this->setWindowDirection(WINDIR_OPEN);
+               this->runPwm();
+               break;
+            case WINST_CLOSING:
+               this->setWindowDirection(WINDIR_CLOSE);
+               this->runPwm();
+               break;
+            case WINST_BETWEEN_MOVING:
+               if (atTargetPosition(tar, est, 0.9f)) {
+                  this->winstate = WINST_BETWEEN_STOPPED;
+                  this->setWindowDirection(WINDIR_STOP);
+                  this->stopMotor();
+                  this->setMotorStatus(0);
+                  this->ui->parent->clear_co_motor_status_mask(this->statusMask);
+               } else {
+                  if (est > tar) {
+                     this->setWindowDirection(WINDIR_CLOSE);
+                     this->runPwm();
+                  } else {
+                     this->setWindowDirection(WINDIR_OPEN);
+                     this->runPwm();
+                  }
+               }
+               break;
          }
-         est = clamp(est, 0.0f, 100.0f);
          if (current_a > this->ui->max_torque_Number->state) {
-            // possibly at the end of our journey
+            // high current = high torque = end of our journey
             ESP_LOGI(TAG, "max current hit %2.3f", current_a);
-            est = tar;
+            switch (this->winstate) {
+               case WINST_OPENING:
+                  this->winstate = WINST_OPEN;
+                  this->setWindowDirection(WINDIR_STOP);
+                  this->stopMotor();
+                  this->setMotorStatus(0);
+                  this->ui->parent->clear_co_motor_status_mask(this->statusMask);
+                  this->encoderCounterAtOpen = this->encoderLastCounter;
+                  break;
+               case WINST_CLOSING:
+                  this->winstate = WINST_CLOSED;
+                  this->setWindowDirection(WINDIR_STOP);
+                  this->stopMotor();
+                  this->setMotorStatus(0);
+                  this->ui->parent->clear_co_motor_status_mask(this->statusMask);
+                  this->encoderCounterAtClosed = encoderLastCounter;
+                  break;
+               case WINST_BETWEEN_MOVING:
+                  this->winstate = WINST_BETWEEN_STOPPED;
+                  this->setWindowDirection(WINDIR_STOP);
+                  this->stopMotor();
+                  this->setMotorStatus(0);
+                  this->ui->parent->clear_co_motor_status_mask(this->statusMask);
+                  if (est > tar) {
+                     // we are moving toward closed and hit max current (torque)
+                     this->encoderCounterAtClosed = encoderLastCounter;
+                  } else {
+                     // we are moving toward opened and hit max current (torque)
+                     this->encoderCounterAtOpen = this->encoderLastCounter;
+                  }
+                  break;
+            }
          }
          this->setEstPosition(est);
-         if (atTargetPosition(tar, est, EST_POS_STEP)) {
-            this->stopMotor();
-            this->setMotorStatus(0);
-            this->ui->parent->clear_co_motor_status_mask(this->statusMask);
-         }
       } else {
          // another lower motor has work to do so stop my motor
          this->stopMotor();
       }
-   } // if !eq(tar,est)
+   } // if weHaveMoveWorkToDo(this->winstate)
 }
 
 void WindowMotorClass::child_sync_update() {
@@ -471,8 +576,8 @@ void WindowMotorClass::child_sync_update() {
    // Called at WindowMotorClass polling rate
    float bus_voltage_v;
    this->getBusVoltage(&bus_voltage_v);
-   ESP_LOGI(TAG, " %c biggestI=%2.3fA",
-          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->largest_current_ever_a);
+   ESP_LOGI(TAG, " %c biggestI=%2.3fA winst=%d",
+          (this->whichMotor==MOTOR_A) ? 'A' : 'B', this->largest_current_ever_a, this->winstate);
    // ESP_LOGI(TAG, "motor=%c child_sync_update winnum=%d", (this->whichMotor == MOTOR_A) ? 'A' : 'B', this->windowNumber);
 }
 

@@ -21,7 +21,16 @@ namespace window_controller {
 
 enum MotorDriverModeEnum { MOTMODE_CW=0, MOTMODE_CCW=1, MOTMODE_SHORTBRAKE=2, MOTMODE_STOP=3 };
 enum WindowDirectionEnum { WINDIR_OPEN=0, WINDIR_CLOSE=1, WINDIR_STOP=2 };
-enum WindowStateEnum { UNINITIALIZED=0, INIT_TRY_OPEN=1, INIT_TRY_CLOSE=2, IS_OPEN=3, IS_CLOSED=4, IS_BETWEEN=5 };
+enum WindowStateEnum { 
+   WINST_UNINITIALIZED=0, 
+   WINST_INIT_TRY_OPEN=1, 
+   WINST_INIT_TRY_CLOSE=2, 
+   WINST_OPEN=3, 
+   WINST_CLOSED=4, 
+   WINST_BETWEEN_STOPPED=5, 
+   WINST_BETWEEN_MOVING=6,
+   WINST_OPENING=7, 
+   WINST_CLOSING=8 };
 
 class WindowMotorClass : public WindowControllerClient, public PollingComponent, public i2c::I2CDevice {
    public:
@@ -49,6 +58,8 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       // Encoder Callback
       void encoderListener(int32_t val);
 
+      float estimatedCurrentPosition();
+
       // Pin Control
       bool setup_pins();
       void setMotorDriverMode(MotorDriverModeEnum mode);
@@ -65,21 +76,17 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void child_publish_info();
       void child_sync_update();
       WCMotorUI *ui;
-      // void set_enca_pin(InternalGPIOPin *pin) {enca_pin_ = pin;}
-      // void set_encb_pin(InternalGPIOPin *pin) {encb_pin_ = pin;}
       void set_in1_pin(InternalGPIOPin *pin) {in1_pin_ = pin;}
       void set_in2_pin(InternalGPIOPin *pin) {in2_pin_ = pin;}
       bool my_turn_to_move();
       
-
+#define ENCODER_COUNTER_INIT INT_MAX
    protected:
       uint32_t faults={0};
       WCNumber *targetPosition;
       uint8_t windowNumber;
       WhichMotorEnum whichMotor;
       uint16_t statusMask;
-      // InternalGPIOPin *enca_pin_{nullptr};
-      // InternalGPIOPin *encb_pin_{nullptr};
       InternalGPIOPin *in1_pin_={nullptr};
       InternalGPIOPin *in2_pin_={nullptr};
       MotorDriverModeEnum motmode={MOTMODE_STOP};
@@ -87,8 +94,8 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       WindowDirectionEnum windir={WINDIR_STOP};
       // Encoder 
       int32_t encoderLastCounter={0};
-      int32_t encoderCounterAtClosed={0};
-      int32_t encoderCounterAtOpen={1000};
+      int32_t encoderCounterAtClosed={ENCODER_COUNTER_INIT};
+      int32_t encoderCounterAtOpen={ENCODER_COUNTER_INIT};
       uint32_t encoderLastCallback_us={INVALID_ENCODER_LAST_CALLBACK_US};
       float encoderSpeed_stepspers={0.0f}; // steps per second
 
@@ -102,7 +109,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
 
       bool shutdownImminent={false};
       float duty={0.0f};
-      WindowStateEnum winstate={UNINITIALIZED};
+      WindowStateEnum winstate={WINST_UNINITIALIZED};
       bool initTryOpenSuccess={false};
       bool initTryCloseSuccess={false};
 };
