@@ -19,6 +19,9 @@ namespace window_controller {
 #define MOTFAULT_PIN_INIT 0x2
 #define MOTFAULT_INA219_READ 0x4
 
+// poll rate is set in __init__.py
+#define POLL_RATE_MS 50u
+
 enum MotorDriverModeEnum { MOTMODE_CW=0, MOTMODE_CCW=1, MOTMODE_SHORTBRAKE=2, MOTMODE_STOP=3 };
 enum WindowDirectionEnum { WINDIR_OPEN=0, WINDIR_CLOSE=1, WINDIR_STOP=2 };
 enum WindowStateEnum { 
@@ -68,6 +71,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void setMotorStatus(uint16_t sts);
       void setEstPosition(float pos);
       void runPwm();
+      void runTorqueManagement(float speed);
       void stopMotor();
       void calcWinNumAndStsMsk();
       void setWhichMotor(WhichMotorEnum whichMotor_) {this->whichMotor = whichMotor_;}
@@ -112,6 +116,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       WindowStateEnum winstate={WINST_UNINITIALIZED};
       bool initTryOpenSuccess={false};
       bool initTryCloseSuccess={false};
+      uint32_t movementStartupCounter={0};
 };
 
 } // namespace window_controller
