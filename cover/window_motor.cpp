@@ -155,6 +155,16 @@ bool WindowMotorClass::powerdownINA219() {
   return FUNC_OK;
 }
 
+bool isMoving(enum WindowStateEnum winst) {
+   if ((winst == WINST_BETWEEN_MOVING) ||
+      (winst == WINST_OPENING) ||
+      (winst == WINST_CLOSING)) {
+      return true;
+   } else {
+      return false;
+   }
+}
+
 #define OPEN_MAX_TORQUE 0.4f
 #define CLOSE_MAX_TORQUE 0.7f
 #define BETWEEN_MAX_TORQUE 0.7f
@@ -170,6 +180,13 @@ bool WindowMotorClass::powerdownINA219() {
 //
 void WindowMotorClass::controlTargetPosition(float value) {
    ESP_LOGD("custom", "controlTargetPosition=%f which=%d", value, this->whichMotor);
+   if (isMoving(this->winstate)) {
+      this->setWindowDirection(WINDIR_STOP);
+      this->stopMotor();
+      this->setMotorStatus(0);
+      this->ui->parent->clear_co_motor_status_mask(this->statusMask);
+      this->winstate = WINST_BETWEEN_STOPPED;
+   }
    if (value == 0.0f) {
       this->ui->max_torque_Number->publish_state(INIT_MAX_TORQUE);
       this->movementStartupCounter = MOVEMENT_STARTUP_COUNTER_INIT;
@@ -605,7 +622,10 @@ void WindowMotorClass::pollMotorMove() {
          this->setEstPosition(this->estimatedCurrentPosition());
       } else {
          // another lower motor has work to do so stop my motor
+         this->setWindowDirection(WINDIR_STOP);
          this->stopMotor();
+         this->setMotorStatus(0);
+         this->ui->parent->clear_co_motor_status_mask(this->statusMask);
       }
    } // if weHaveMoveWorkToDo(this->winstate)
 }
