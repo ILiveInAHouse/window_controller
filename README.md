@@ -124,8 +124,8 @@ number:
       which_motor: MOTOR_A
       device_id: motor_A_device
       mode: BOX
-    max_torque:
-      name: "Max Torque"
+    max_current:
+      name: "Max Current"
       which_motor: MOTOR_A
       device_id: motor_A_device
   - platform: window_controller
@@ -139,8 +139,8 @@ number:
       which_motor: MOTOR_B
       device_id: motor_B_device
       mode: BOX
-    max_torque:
-      name: "Max Torque"
+    max_current:
+      name: "Max Current"
       which_motor: MOTOR_B
       device_id: motor_B_device
 ```

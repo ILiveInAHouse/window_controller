@@ -17,7 +17,7 @@ class WindowControllerHub;
 class WCMotorUI {
 public:
    WCNumber *target_position_Number{nullptr};
-   WCNumber *max_torque_Number{nullptr};
+   WCNumber *max_current_Number{nullptr};
    WCNumber *all_motor_status_Number{nullptr}; // input from Hass
    WCSensor *window_number_Sensor{nullptr};
    WCSensor *faults_Sensor{nullptr};
@@ -29,7 +29,7 @@ public:
    uint8_t boardId;
    float numRotationsToFullOpen;
    float currentRotationIndex;
-   float maxTorqueSeen;
+   float maxCurrentSeen;
    float current;
    float rpm;
    WhichMotorEnum getWhichMotor() {return this->whichMotor;}

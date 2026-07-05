@@ -35,6 +35,12 @@ enum WindowStateEnum {
    WINST_OPENING=7, 
    WINST_CLOSING=8 };
 
+struct winParams_t {
+   float openMaxCurrent;
+   float closeMaxCurrent;
+   float startMaxCurrent;
+};
+
 class WindowMotorClass : public WindowControllerClient, public PollingComponent, public i2c::I2CDevice {
    public:
       // Constructor
@@ -71,7 +77,7 @@ class WindowMotorClass : public WindowControllerClient, public PollingComponent,
       void setMotorStatus(uint16_t sts);
       void setEstPosition(float pos);
       void runPwm();
-      void runTorqueManagement(float speed);
+      void runCurrentManagement(float speed);
       void stopMotor();
       void calcWinNumAndStsMsk();
       void setWhichMotor(WhichMotorEnum whichMotor_) {this->whichMotor = whichMotor_;}

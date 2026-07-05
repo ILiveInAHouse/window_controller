@@ -79,17 +79,17 @@ class WindowControllerHub : public PollingComponent {
       }
     }
 
-    void set_max_torque(WCNumber *n) {
+    void set_max_current(WCNumber *n) {
       WCNumber *n_ = n;
       // Tell the child who its parent is
       n_->set_parent(this);
 
       if (whichMotorIsValid(n_->whichMotor)) {
         if (n_->whichMotor == MOTOR_A) {
-          this->motuiA.max_torque_Number = n_;
+          this->motuiA.max_current_Number = n_;
         }
         if (n_->whichMotor == MOTOR_B) {
-          this->motuiB.max_torque_Number = n_;
+          this->motuiB.max_current_Number = n_;
         }
       }
     }
