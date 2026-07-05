@@ -94,6 +94,51 @@ class WindowControllerHub : public PollingComponent {
       }
     }
 
+    void set_open_max_current(WCNumber *n) {
+      WCNumber *n_ = n;
+      // Tell the child who its parent is
+      n_->set_parent(this);
+
+      if (whichMotorIsValid(n_->whichMotor)) {
+        if (n_->whichMotor == MOTOR_A) {
+          this->motuiA.open_max_current_Number = n_;
+        }
+        if (n_->whichMotor == MOTOR_B) {
+          this->motuiB.open_max_current_Number = n_;
+        }
+      }
+    }
+
+    void set_close_max_current(WCNumber *n) {
+      WCNumber *n_ = n;
+      // Tell the child who its parent is
+      n_->set_parent(this);
+
+      if (whichMotorIsValid(n_->whichMotor)) {
+        if (n_->whichMotor == MOTOR_A) {
+          this->motuiA.close_max_current_Number = n_;
+        }
+        if (n_->whichMotor == MOTOR_B) {
+          this->motuiB.close_max_current_Number = n_;
+        }
+      }
+    }
+
+    void set_start_max_current(WCNumber *n) {
+      WCNumber *n_ = n;
+      // Tell the child who its parent is
+      n_->set_parent(this);
+
+      if (whichMotorIsValid(n_->whichMotor)) {
+        if (n_->whichMotor == MOTOR_A) {
+          this->motuiA.start_max_current_Number = n_;
+        }
+        if (n_->whichMotor == MOTOR_B) {
+          this->motuiB.start_max_current_Number = n_;
+        }
+      }
+    }
+
     void set_all_motor_status(WCNumber *n) {
       WCNumber *n_ = n;
       // Tell the child who its parent is

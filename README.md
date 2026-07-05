@@ -128,6 +128,18 @@ number:
       name: "Max Current"
       which_motor: MOTOR_A
       device_id: motor_A_device
+    open_max_current:
+      name: "Open Max Current"
+      which_motor: MOTOR_A
+      device_id: motor_A_device
+    close_max_current:
+      name: "Close Max Current"
+      which_motor: MOTOR_A
+      device_id: motor_A_device
+    start_max_current:
+      name: "Start Max Current"
+      which_motor: MOTOR_A
+      device_id: motor_A_device
   - platform: window_controller
     window_controller_id: window_controller_hub_id
     target_position:
@@ -141,6 +153,18 @@ number:
       mode: BOX
     max_current:
       name: "Max Current"
+      which_motor: MOTOR_B
+      device_id: motor_B_device
+    open_max_current:
+      name: "Open Max Current"
+      which_motor: MOTOR_B
+      device_id: motor_B_device
+    close_max_current:
+      name: "Close Max Current"
+      which_motor: MOTOR_B
+      device_id: motor_B_device
+    start_max_current:
+      name: "Start Max Current"
       which_motor: MOTOR_B
       device_id: motor_B_device
 ```

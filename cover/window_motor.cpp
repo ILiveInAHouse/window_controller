@@ -165,17 +165,18 @@ bool isMoving(enum WindowStateEnum winst) {
    }
 }
 
+// 0.6A is enough to start open from a closed state
 winParams_t winParams[15] = {
    // {openMaxCurrent, closeMaxCurrent, startMaxCurrent}
-   {0.4f, 0.7f, 0.6f}, // window 0
+   {0.4f, 0.7f, 0.6f}, // window 0 - not used
    {0.4f, 0.7f, 0.6f}, // window 1
    {0.4f, 0.7f, 0.6f}, // window 2
-   {0.4f, 0.7f, 0.6f}, // window 3
-   {0.4f, 0.7f, 0.6f}, // window 4
+   {0.4f, 0.7f, 0.6f}, // window 3 - not used
+   {0.4f, 0.7f, 0.6f}, // window 4 - not used
    {0.4f, 0.7f, 0.6f}, // window 5
    {0.4f, 0.7f, 0.6f}, // window 6
-   {0.4f, 0.7f, 0.6f}, // window 7
-   {0.4f, 0.7f, 0.6f}, // window 8
+   {0.4f, 0.7f, 0.6f}, // window 7 - not used
+   {0.4f, 0.7f, 0.6f}, // window 8 - not used
    {0.4f, 0.7f, 0.6f}, // window 9
    {0.4f, 0.7f, 0.6f}, // window 10
    {0.4f, 0.7f, 0.6f}, // window 11
@@ -184,10 +185,6 @@ winParams_t winParams[15] = {
    {0.4f, 0.7f, 0.6f}  // window 14
 };
 
-#define OPEN_MAX_CURRENT 0.4f
-#define CLOSE_MAX_CURRENT 0.7f
-// 0.6A is enough to start open from a closed state
-#define INIT_MAX_CURRENT 0.6f
 // movement startup mode is for 5000ms
 #define MOVEMENT_STARTUP_COUNTER_INIT 5000
 //
@@ -206,18 +203,18 @@ void WindowMotorClass::controlTargetPosition(float value) {
       this->winstate = WINST_BETWEEN_STOPPED;
    }
    if (value == 0.0f) {
-      this->ui->max_current_Number->publish_state(INIT_MAX_CURRENT);
+      this->ui->max_current_Number->publish_state(this->ui->start_max_current_Number->state);
       this->movementStartupCounter = MOVEMENT_STARTUP_COUNTER_INIT;
       this->winstate = WINST_CLOSING;
    } else if (value == 100.0f) {
-      this->ui->max_current_Number->publish_state(INIT_MAX_CURRENT);
+      this->ui->max_current_Number->publish_state(this->ui->start_max_current_Number->state);
       this->movementStartupCounter = MOVEMENT_STARTUP_COUNTER_INIT;
       this->winstate = WINST_OPENING;
    } else {
       float estpos = this->estimatedCurrentPosition();
       // estimatedCurrentPosition returns -1.0f if unknown
       if (estpos > -0.1f) {
-         this->ui->max_current_Number->publish_state(INIT_MAX_CURRENT);
+         this->ui->max_current_Number->publish_state(this->ui->start_max_current_Number->state);
          this->movementStartupCounter = MOVEMENT_STARTUP_COUNTER_INIT;
          this->winstate = WINST_BETWEEN_MOVING;
       }
@@ -401,11 +398,11 @@ void WindowMotorClass::runCurrentManagement(float speed) {
    if (shouldSetEndCurrent) {
       // adjust current to movement end parameters
       if (this->winstate == WINST_CLOSING) {
-         this->ui->max_current_Number->publish_state(CLOSE_MAX_CURRENT);
+         this->ui->max_current_Number->publish_state(this->ui->close_max_current_Number->state);
       } else if (this->winstate == WINST_OPENING) {
-         this->ui->max_current_Number->publish_state(OPEN_MAX_CURRENT);
+         this->ui->max_current_Number->publish_state(this->ui->open_max_current_Number->state);
       } else if (this->winstate == WINST_BETWEEN_MOVING) {
-         this->ui->max_current_Number->publish_state(OPEN_MAX_CURRENT);
+         this->ui->max_current_Number->publish_state(this->ui->open_max_current_Number->state);
       }
    }
 }
@@ -478,6 +475,10 @@ void WindowMotorClass::child_setup(WCMotorUI *ui) {
 
    // Calculate window number and statusMask
    this->calcWinNumAndStsMsk();
+   // we need windowNumber (calculated above) for these:
+   this->ui->open_max_current_Number->publish_state(winParams[this->windowNumber].openMaxCurrent);
+   this->ui->close_max_current_Number->publish_state(winParams[this->windowNumber].closeMaxCurrent);
+   this->ui->start_max_current_Number->publish_state(winParams[this->windowNumber].startMaxCurrent);
 
    // Set up control callbacks
    this->ui->target_position_Number->add_on_state_callback([this](float value) {

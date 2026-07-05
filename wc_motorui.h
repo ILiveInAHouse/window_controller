@@ -18,6 +18,9 @@ class WCMotorUI {
 public:
    WCNumber *target_position_Number{nullptr};
    WCNumber *max_current_Number{nullptr};
+   WCNumber *open_max_current_Number{nullptr};
+   WCNumber *close_max_current_Number{nullptr};
+   WCNumber *start_max_current_Number{nullptr};
    WCNumber *all_motor_status_Number{nullptr}; // input from Hass
    WCSensor *window_number_Sensor{nullptr};
    WCSensor *faults_Sensor{nullptr};
